@@ -1,0 +1,88 @@
+# CI & Deploy workflow: build, lint, test (if scripts present) and deploy to GitHub Pages.
+# Place this file at .github/workflows/ci-pages.yml
+
+name: CI & Deploy
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    name: Build, test and deploy to GitHub Pages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies (if present)
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          elif [ -f package.json ]; then
+            npm install
+          else
+            echo "No package.json found — skipping install"
+          fi
+
+      - name: Lint (if script present)
+        run: npm run lint --if-present
+
+      - name: Run tests (if script present)
+        run: npm test --if-present
+
+      - name: Build (if script present)
+        env:
+          CI: true
+        run: npm run build --if-present
+
+      - name: Prepare site directory
+        id: prepare
+        run: |
+          # If build produced a dist/ folder (Vite default) use it; otherwise mirror repository root excluding heavy folders
+          if [ -d "./dist" ]; then
+            echo "deploy_path=dist" >> $GITHUB_OUTPUT
+            echo "Using dist/ as site artifact"
+            ls -la dist || true
+          else
+            echo "No dist/ found — creating .site from repo root"
+            rm -rf .site
+            mkdir -p .site
+            rsync -a --exclude='.git' --exclude='node_modules' --exclude='.github' --exclude='.site' --exclude='dist' ./ .site/
+            echo "deploy_path=.site" >> $GITHUB_OUTPUT
+            ls -la .site || true
+          fi
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v3
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: ${{ steps.prepare.outputs.deploy_path }}
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v1
