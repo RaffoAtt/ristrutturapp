@@ -114,18 +114,8 @@
 <!-- APP -->
 <div id="app" class="hidden">
 
-  <!-- TOP BAR -->
-  <header class="top-bar">
-    <button class="icon-btn" onclick="toggleSidebar()">☰</button>
-    <div class="top-bar-title" id="page-title">Dashboard</div>
-    <button class="icon-btn" id="btn-top-add" onclick="handleAddBtn()">＋</button>
-  </header>
-
-  <!-- SIDEBAR OVERLAY -->
-  <div id="sidebar-overlay" class="sidebar-overlay hidden" onclick="closeSidebar()"></div>
-
-  <!-- SIDEBAR -->
-  <aside id="sidebar" class="sidebar hidden">
+  <!-- SIDEBAR FISSA (Desktop) -->
+  <aside id="sidebar" class="sidebar sidebar-desktop">
     <div class="sidebar-header">
       <div class="sidebar-logo">🏗️</div>
       <div>
@@ -133,6 +123,53 @@
         <p class="sidebar-sub">Gestione Ristrutturazioni</p>
       </div>
     </div>
+
+    <!-- AUTH SECTION -->
+    <div class="sidebar-section sidebar-auth">
+      <div class="sidebar-label">Account</div>
+      <div id="auth-status-sidebar">
+        <button class="btn-auth" onclick="showLoginUI()">🔓 Accedi</button>
+        <button class="btn-auth" onclick="showSignUpUI()" style="margin-top: 8px;">✍️ Registrati</button>
+      </div>
+      <div id="auth-user-info" style="display: none;">
+        <div class="user-info-box">
+          <div class="user-avatar">👤</div>
+          <div class="user-details">
+            <div class="user-email" id="sidebar-user-email">utente@esempio.it</div>
+            <button class="btn-logout" onclick="handleSignOut()">🚪 Logout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PREMIUM BUTTON -->
+    <div class="sidebar-section sidebar-premium">
+      <button class="btn-premium" onclick="showPremiumModal()">
+        <span class="premium-icon">⭐</span>
+        <div class="premium-text">
+          <div class="premium-title">Upgrade Premium</div>
+          <div class="premium-desc">Progetti illimitati</div>
+        </div>
+      </button>
+    </div>
+
+    <hr class="sidebar-divider">
+
+    <!-- NAVIGATION MENU -->
+    <div class="sidebar-section sidebar-nav">
+      <div class="sidebar-label">Navigazione</div>
+      <ul class="sidebar-list nav-list">
+        <li class="nav-item active" id="nav-dashboard-sidebar" onclick="showSection('dashboard')"><span>🏠</span> Home</li>
+        <li class="nav-item" id="nav-lavori-sidebar" onclick="showSection('lavori')"><span>🔨</span> Lavori</li>
+        <li class="nav-item" id="nav-spese-sidebar" onclick="showSection('spese')"><span>💸</span> Spese</li>
+        <li class="nav-item" id="nav-computo-sidebar" onclick="showSection('computo')"><span>📄</span> Computo</li>
+        <li class="nav-item" id="nav-fornitori-sidebar" onclick="showSection('fornitori')"><span>👷</span> Fornitori</li>
+        <li class="nav-item" id="nav-scadenze-sidebar" onclick="showSection('scadenze')"><span>📅</span> Scadenze</li>
+      </ul>
+    </div>
+
+    <hr class="sidebar-divider">
+
     <div class="sidebar-section">
       <div class="sidebar-label">PROGETTO ATTIVO</div>
       <div id="progetto-attivo-name" class="progetto-badge">Nessun progetto</div>
@@ -140,19 +177,25 @@
     <div class="sidebar-section">
       <div class="sidebar-label">I MIEI PROGETTI</div>
       <ul id="progetti-list" class="sidebar-list"></ul>
-      <button class="sidebar-new-btn" onclick="closeSidebar(); showModal('modal-progetto')">+ Nuovo Progetto</button>
+      <button class="sidebar-new-btn" onclick="showModal('modal-progetto')">+ Nuovo Progetto</button>
     </div>
     <div class="sidebar-section">
       <div class="sidebar-label">ALTRO</div>
       <ul class="sidebar-list">
-        <li onclick="closeSidebar(); showSection('impostazioni')"><span>⚙️</span> Impostazioni</li>
+        <li onclick="showSection('impostazioni')"><span>⚙️</span> Impostazioni</li>
         <li onclick="exportAllData()"><span>📤</span> Esporta Backup</li>
         <li onclick="triggerImportBackup()"><span>📥</span> Importa Backup</li>
-        <li onclick="handleSignOut()"><span>🚪</span> Logout</li>
       </ul>
     </div>
     <input type="file" id="import-backup-input" accept=".json" style="display:none" onchange="importBackup(event)" />
   </aside>
+
+  <!-- TOP BAR (Empty - Navigation moved to sidebar) -->
+  <header class="top-bar">
+  </header>
+
+  <!-- SIDEBAR OVERLAY (Mobile) -->
+  <div id="sidebar-overlay" class="sidebar-overlay hidden" onclick="closeSidebar()"></div>
 
   <!-- MAIN -->
   <main class="main-content">
@@ -440,33 +483,6 @@
     </div>
   </aside>
 
-  <!-- BOTTOM NAV -->
-  <nav class="bottom-nav">
-    <button class="nav-btn active" id="nav-dashboard" onclick="showSection('dashboard')">
-      <span class="nav-icon">🏠</span>
-      <span class="nav-lbl">Home</span>
-    </button>
-    <button class="nav-btn" id="nav-lavori" onclick="showSection('lavori')">
-      <span class="nav-icon">🔨</span>
-      <span class="nav-lbl">Lavori</span>
-    </button>
-    <button class="nav-btn" id="nav-spese" onclick="showSection('spese')">
-      <span class="nav-icon">💸</span>
-      <span class="nav-lbl">Spese</span>
-    </button>
-    <button class="nav-btn" id="nav-computo" onclick="showSection('computo')">
-      <span class="nav-icon">📄</span>
-      <span class="nav-lbl">Computo</span>
-    </button>
-    <button class="nav-btn" id="nav-fornitori" onclick="showSection('fornitori')">
-      <span class="nav-icon">👷</span>
-      <span class="nav-lbl">Fornitori</span>
-    </button>
-    <button class="nav-btn" id="nav-scadenze" onclick="showSection('scadenze')">
-      <span class="nav-icon">📅</span>
-      <span class="nav-lbl">Scadenze</span>
-    </button>
-  </nav>
 
 </div><!-- end #app -->
 

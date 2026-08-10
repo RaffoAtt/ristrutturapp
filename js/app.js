@@ -105,6 +105,15 @@ window.showLoginModal = function() {
   window.showLoginUI?.();
 };
 
+window.showSignUpUI = function() {
+  window.toggleAuthMode?.();
+  window.showLoginUI?.();
+};
+
+window.showPremiumModal = function() {
+  window.showToast?.('🌟 Funzionalità Premium - Contatta il supporto per l\'upgrade');
+};
+
 // Globali
 window.renderAll = renderAll;
 window.handleAddBtn = handleAddBtn;
