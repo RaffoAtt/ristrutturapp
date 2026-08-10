@@ -18,6 +18,16 @@
 </head>
 <body>
 
+<!-- SPLASH -->
+<div id="splash-screen">
+  <div class="splash-content">
+    <div class="splash-icon">🏗️</div>
+    <h1>RistrutturaApp</h1>
+    <p>Gestione Lavori & Spese</p>
+    <div class="splash-loader"><div></div></div>
+  </div>
+</div>
+
 <!-- LANDING PAGE -->
 <div id="landing-page" class="hidden">
   <div style="display: flex; flex-direction: column; min-height: 100vh; background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%); justify-content: center; align-items: center; padding: 20px;">
@@ -52,216 +62,385 @@
   </div>
 </div>
 
-<!-- APP -->
-<div id="app" class="app-layout">
+<!-- LOGIN CONTAINER -->
+<div id="login-container" class="hidden">
+  <div class="login-wrapper">
+    <div class="login-header">
+      <div class="login-icon">🏗️</div>
+      <h1>RistrutturaApp</h1>
+      <p>Gestione Ristrutturazioni</p>
+    </div>
 
-  <!-- HEADER FISSO TOP -->
-  <header class="app-header">
-    <div class="header-left">
-      <button class="header-menu-btn mobile-only" onclick="toggleSidebar()">☰</button>
-      <div class="header-logo">🏗️</div>
-      <h1 class="header-title">RistrutturaApp</h1>
+    <!-- LOGIN FORM -->
+    <form id="login-form" class="login-form" onsubmit="event.preventDefault(); handleSignIn()">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="login-email" class="form-input" placeholder="tu@esempio.it" required />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="login-password" class="form-input" placeholder="••••••" required />
+      </div>
+      <button type="submit" class="btn-primary full-btn">🔓 Accedi</button>
+      <div class="login-divider">oppure</div>
+      <button type="button" class="btn-outline full-btn" onclick="toggleAuthMode()">✍️ Crea Account</button>
+    </form>
+
+    <!-- SIGNUP FORM -->
+    <form id="signup-form" class="login-form hidden" onsubmit="event.preventDefault(); handleSignUp()">
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="signup-email" class="form-input" placeholder="tu@esempio.it" required />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="signup-password" class="form-input" placeholder="Almeno 6 caratteri" required />
+      </div>
+      <div class="form-group">
+        <label>Conferma Password</label>
+        <input type="password" id="signup-password-confirm" class="form-input" placeholder="Ripeti password" required />
+      </div>
+      <button type="submit" class="btn-primary full-btn">✍️ Registrati</button>
+      <div class="login-divider">oppure</div>
+      <button type="button" class="btn-outline full-btn" onclick="toggleAuthMode()">🔓 Accedi</button>
+    </form>
+
+    <div class="login-footer">
+      <p>I tuoi dati sono protetti da Supabase</p>
     </div>
-    <div class="header-center" id="page-title-center">Dashboard</div>
-    <div class="header-right">
-      <button class="header-icon-btn" id="btn-top-add" onclick="handleAddBtn()" title="Aggiungi">＋</button>
-      <button class="header-icon-btn" title="Notifiche">🔔</button>
-      <button class="header-icon-btn" title="Premium" onclick="showPremiumModal()">⭐</button>
-      <div class="header-profile" title="Profilo">👤</div>
-    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+
+  <!-- TOP BAR -->
+  <header class="top-bar">
+    <button class="icon-btn" onclick="toggleSidebar()">☰</button>
+    <div class="top-bar-title" id="page-title">Dashboard</div>
+    <button class="icon-btn" id="btn-top-add" onclick="handleAddBtn()">＋</button>
   </header>
 
-  <!-- MAIN LAYOUT CONTAINER (3-COLONNE) -->
-  <div class="app-main">
+  <!-- SIDEBAR OVERLAY -->
+  <div id="sidebar-overlay" class="sidebar-overlay hidden" onclick="closeSidebar()"></div>
 
-    <!-- SIDEBAR FISSO LEFT -->
-    <aside id="sidebar" class="sidebar-main">
-      <div class="sidebar-header">
-        <div class="sidebar-logo">🏗️</div>
-        <div>
-          <h2>RistrutturaApp</h2>
-          <p class="sidebar-sub">Gestione Ristrutturazioni</p>
-        </div>
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="sidebar hidden">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">🏗️</div>
+      <div>
+        <h2>RistrutturaApp</h2>
+        <p class="sidebar-sub">Gestione Ristrutturazioni</p>
       </div>
-      <div class="sidebar-section">
-        <div class="sidebar-label">PROGETTO ATTIVO</div>
-        <div class="progetto-badge">Progetto Test</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">PROGETTO ATTIVO</div>
+      <div id="progetto-attivo-name" class="progetto-badge">Nessun progetto</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">I MIEI PROGETTI</div>
+      <ul id="progetti-list" class="sidebar-list"></ul>
+      <button class="sidebar-new-btn" onclick="closeSidebar(); showModal('modal-progetto')">+ Nuovo Progetto</button>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">ALTRO</div>
+      <ul class="sidebar-list">
+        <li onclick="closeSidebar(); showSection('impostazioni')"><span>⚙️</span> Impostazioni</li>
+        <li onclick="exportAllData()"><span>📤</span> Esporta Backup</li>
+        <li onclick="triggerImportBackup()"><span>📥</span> Importa Backup</li>
+        <li onclick="handleSignOut()"><span>🚪</span> Logout</li>
+      </ul>
+    </div>
+    <input type="file" id="import-backup-input" accept=".json" style="display:none" onchange="importBackup(event)" />
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- ===== DASHBOARD ===== -->
+    <section id="section-dashboard" class="section active">
+      <div class="section-scroll">
+
+        <div class="card card-hero">
+          <div class="hero-top">
+            <div>
+              <div class="hero-label">Budget Totale Progetto</div>
+              <div class="hero-amount" id="dash-budget-totale">€ 0,00</div>
+            </div>
+            <div class="hero-icon-big">💰</div>
+          </div>
+          <div class="hero-row">
+            <div class="hero-stat">
+              <div class="hero-stat-label">Speso</div>
+              <div class="hero-stat-val red" id="dash-speso">€ 0,00</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-label">Residuo</div>
+              <div class="hero-stat-val green" id="dash-residuo">€ 0,00</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-label">Preventivo</div>
+              <div class="hero-stat-val blue" id="dash-preventivo">€ 0,00</div>
+            </div>
+          </div>
+          <div class="budget-bar-wrap">
+            <div class="budget-bar-fill" id="dash-bar-fill" style="width:0%"></div>
+          </div>
+          <div class="budget-bar-label" id="dash-bar-label">0% del budget utilizzato</div>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card" onclick="showSection('lavori')">
+            <div class="kpi-icon">📋</div>
+            <div class="kpi-val" id="kpi-tot">0</div>
+            <div class="kpi-lbl">Totali</div>
+          </div>
+          <div class="kpi-card" onclick="showSection('lavori')">
+            <div class="kpi-icon">🔨</div>
+            <div class="kpi-val orange" id="kpi-corso">0</div>
+            <div class="kpi-lbl">In Corso</div>
+          </div>
+          <div class="kpi-card" onclick="showSection('lavori')">
+            <div class="kpi-icon">✅</div>
+            <div class="kpi-val green" id="kpi-ok">0</div>
+            <div class="kpi-lbl">Completati</div>
+          </div>
+          <div class="kpi-card" onclick="showSection('spese')">
+            <div class="kpi-icon">🧾</div>
+            <div class="kpi-val blue" id="kpi-spese-n">0</div>
+            <div class="kpi-lbl">Spese</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📊 Avanzamento per Categoria</span>
+          </div>
+          <div id="dash-cat-progress"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">💸 Spese per Categoria</span>
+            <select id="chart-period" class="card-select" onchange="renderDashboard()">
+              <option value="all">Tutto</option>
+              <option value="month">Mese corrente</option>
+              <option value="week">Settimana</option>
+            </select>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="chart-spese-cat"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">⏰ Prossime Scadenze</span>
+            <button class="card-link" onclick="showSection('scadenze')">Vedi tutte</button>
+          </div>
+          <div id="dash-scadenze"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🧾 Ultime Spese</span>
+            <button class="card-link" onclick="showSection('spese')">Vedi tutte</button>
+          </div>
+          <div id="dash-ultime-spese"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">📈 Andamento Spese</span>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="chart-andamento"></canvas>
+          </div>
+        </div>
+
+        <div style="height:90px"></div>
       </div>
-      <div class="sidebar-section">
-        <div class="sidebar-label">MENU</div>
-        <ul class="sidebar-list">
-          <li onclick="showSection('dashboard')"><span>🏠</span> Dashboard</li>
-          <li onclick="showSection('lavori')"><span>🔨</span> Lavori</li>
-          <li onclick="showSection('spese')"><span>💸</span> Spese</li>
-          <li onclick="showSection('fornitori')"><span>👷</span> Fornitori</li>
-        </ul>
+    </section>
+
+    <!-- ===== LAVORI ===== -->
+    <section id="section-lavori" class="section">
+      <div class="section-scroll">
+        <div class="search-bar-wrap">
+          <input type="text" id="lavori-search" placeholder="🔍  Cerca lavoro..." class="search-input" oninput="renderLavori()" />
+        </div>
+        <div class="filter-chips">
+          <button class="chip active" onclick="setLavoriFilter('all',this)">Tutti</button>
+          <button class="chip" onclick="setLavoriFilter('da_fare',this)">Da fare</button>
+          <button class="chip" onclick="setLavoriFilter('in_corso',this)">In corso</button>
+          <button class="chip" onclick="setLavoriFilter('completato',this)">Completati</button>
+          <button class="chip" onclick="setLavoriFilter('sospeso',this)">Sospesi</button>
+        </div>
+        <div id="lavori-list"></div>
+        <div style="height:90px"></div>
       </div>
-    </aside>
+    </section>
 
-    <!-- MAIN CONTENT AREA CENTRALE -->
-    <main class="main-content">
-
-      <!-- DASHBOARD SECTION -->
-      <section id="section-dashboard" class="section active">
-        <div class="section-scroll">
-          <div class="card card-hero">
-            <div class="hero-top">
-              <div>
-                <div class="hero-label">Budget Totale Progetto</div>
-                <div class="hero-amount" id="dash-budget-totale">€ 0,00</div>
-              </div>
-              <div class="hero-icon-big">💰</div>
-            </div>
-            <div class="hero-row">
-              <div class="hero-stat">
-                <div class="hero-stat-label">Speso</div>
-                <div class="hero-stat-val red" id="dash-speso">€ 0,00</div>
-              </div>
-              <div class="hero-stat">
-                <div class="hero-stat-label">Residuo</div>
-                <div class="hero-stat-val green" id="dash-residuo">€ 0,00</div>
-              </div>
-              <div class="hero-stat">
-                <div class="hero-stat-label">Preventivo</div>
-                <div class="hero-stat-val blue" id="dash-preventivo">€ 0,00</div>
-              </div>
-            </div>
-            <div class="budget-bar-wrap">
-              <div class="budget-bar-fill" id="dash-bar-fill" style="width:0%"></div>
-            </div>
-            <div class="budget-bar-label" id="dash-bar-label">0% del budget utilizzato</div>
-          </div>
-          <div style="height: 90px;"></div>
+    <!-- ===== SPESE ===== -->
+    <section id="section-spese" class="section">
+      <div class="section-scroll">
+        <div class="search-bar-wrap">
+          <input type="text" id="spese-search" placeholder="🔍  Cerca spesa..." class="search-input" oninput="renderSpese()" />
         </div>
-      </section>
-
-      <!-- LAVORI SECTION -->
-      <section id="section-lavori" class="section">
-        <div class="section-scroll">
-          <div class="search-bar-wrap">
-            <input type="text" id="lavori-search" placeholder="🔍 Cerca lavoro..." class="search-input" />
-          </div>
-          <div class="filter-chips">
-            <button class="chip active" onclick="setLavoriFilter('all',this)">Tutti</button>
-            <button class="chip" onclick="setLavoriFilter('da_fare',this)">Da fare</button>
-            <button class="chip" onclick="setLavoriFilter('in_corso',this)">In corso</button>
-            <button class="chip" onclick="setLavoriFilter('completato',this)">Completati</button>
-            <button class="chip" onclick="setLavoriFilter('sospeso',this)">Sospesi</button>
-          </div>
-          <div id="lavori-list"></div>
-          <div style="height: 90px;"></div>
+        <div class="filter-chips">
+          <button class="chip active" onclick="setSpeseFilter('all',this)">Tutte</button>
+          <button class="chip" onclick="setSpeseFilter('Materiali',this)">Materiali</button>
+          <button class="chip" onclick="setSpeseFilter('Manodopera',this)">Manodopera</button>
+          <button class="chip" onclick="setSpeseFilter('Noleggio',this)">Noleggio</button>
+          <button class="chip" onclick="setSpeseFilter('Progettazione',this)">Progettazione</button>
+          <button class="chip" onclick="setSpeseFilter('Altro',this)">Altro</button>
         </div>
-      </section>
-
-      <!-- SPESE SECTION -->
-      <section id="section-spese" class="section">
-        <div class="section-scroll">
-          <div class="search-bar-wrap">
-            <input type="text" id="spese-search" placeholder="🔍 Cerca spesa..." class="search-input" />
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Riepilogo Spese</span>
           </div>
-          <div class="filter-chips">
-            <button class="chip active" onclick="setSpeseFilter('all',this)">Tutte</button>
-            <button class="chip" onclick="setSpeseFilter('Materiali',this)">Materiali</button>
-            <button class="chip" onclick="setSpeseFilter('Manodopera',this)">Manodopera</button>
-            <button class="chip" onclick="setSpeseFilter('Noleggio',this)">Noleggio</button>
-            <button class="chip" onclick="setSpeseFilter('Progettazione',this)">Progettazione</button>
-            <button class="chip" onclick="setSpeseFilter('Altro',this)">Altro</button>
-          </div>
-          <div id="spese-list"></div>
-          <div style="height: 90px;"></div>
+          <div class="spese-summary-grid" id="spese-summary"></div>
         </div>
-      </section>
+        <div id="spese-list"></div>
+        <div style="height:90px"></div>
+      </div>
+    </section>
 
-      <!-- COMPUTO SECTION -->
-      <section id="section-computo" class="section">
-        <div class="section-scroll">
+    <!-- ===== COMPUTO METRICO ===== -->
+    <section id="section-computo" class="section">
+      <div class="section-scroll">
+        <div class="card card-import" id="computo-drop-zone">
+          <div class="import-icon">📄</div>
+          <h3>Importa Computo Metrico</h3>
+          <p>Supporta file <strong>CSV</strong>, <strong>Excel (.xlsx/.xls)</strong> e <strong>PDF</strong></p>
+          <button class="btn-primary" onclick="document.getElementById('computo-file-input').click()">
+            📂 Scegli File
+          </button>
+          <input type="file" id="computo-file-input" accept=".csv,.xlsx,.xls,.pdf" style="display:none" onchange="importComputo(event)" />
+          <p class="import-hint">Trascina il file qui o tocca per scegliere</p>
+        </div>
+
+        <div id="computo-preview" class="hidden">
           <div class="card">
             <div class="card-header">
-              <span class="card-title">📄 Computo Metrico</span>
+              <span class="card-title" id="computo-file-name">File importato</span>
+              <button class="card-link danger" onclick="clearComputo()">✕ Rimuovi</button>
             </div>
-            <p>Importa file computo metrico</p>
+            <div id="computo-stats" class="computo-stats-row"></div>
+            <div class="table-scroll" id="computo-table-wrap"></div>
           </div>
-          <div style="height: 90px;"></div>
-        </div>
-      </section>
-
-      <!-- FORNITORI SECTION -->
-      <section id="section-fornitori" class="section">
-        <div class="section-scroll">
-          <div class="search-bar-wrap">
-            <input type="text" id="fornitori-search" placeholder="🔍 Cerca fornitore..." class="search-input" />
-          </div>
-          <div class="filter-chips">
-            <button class="chip active" onclick="setFornitoriFilter('all',this)">Tutti</button>
-            <button class="chip" onclick="setFornitoriFilter('Muratore',this)">Muratore</button>
-            <button class="chip" onclick="setFornitoriFilter('Elettricista',this)">Elettricista</button>
-            <button class="chip" onclick="setFornitoriFilter('Idraulico',this)">Idraulico</button>
-            <button class="chip" onclick="setFornitoriFilter('Falegname',this)">Falegname</button>
-            <button class="chip" onclick="setFornitoriFilter('Altro',this)">Altro</button>
-          </div>
-          <div id="fornitori-list"></div>
-          <div style="height: 90px;"></div>
-        </div>
-      </section>
-
-      <!-- SCADENZE SECTION -->
-      <section id="section-scadenze" class="section">
-        <div class="section-scroll">
-          <div class="filter-chips">
-            <button class="chip active" onclick="setScadenzeFilter('all',this)">Tutte</button>
-            <button class="chip" onclick="setScadenzeFilter('upcoming',this)">Prossime 7gg</button>
-            <button class="chip" onclick="setScadenzeFilter('scaduta',this)">Scadute</button>
-          </div>
-          <div id="scadenze-list"></div>
-          <div style="height: 90px;"></div>
-        </div>
-      </section>
-
-      <!-- IMPOSTAZIONI SECTION -->
-      <section id="section-impostazioni" class="section">
-        <div class="section-scroll">
           <div class="card">
-            <div class="card-header"><span class="card-title">⚙️ Impostazioni</span></div>
-            <p>Impostazioni progetto</p>
+            <div class="card-header">
+              <span class="card-title">Seleziona voci da importare</span>
+              <button class="card-link" onclick="toggleSelectAll()">Sel. tutti</button>
+            </div>
+            <p class="hint-text">Spunta le voci da aggiungere come lavori al progetto attivo</p>
+            <div id="computo-voci-sel"></div>
+            <button class="btn-primary full-btn" onclick="importVociSelezionate()">✅ Importa Lavori Selezionati</button>
           </div>
-          <div style="height: 90px;"></div>
         </div>
-      </section>
 
-    </main>
-
-    <!-- RIGHT PANEL - ADS/PREMIUM (Desktop only) -->
-    <aside class="right-panel">
-      <div class="panel-header">📣 Annunci</div>
-      
-      <div class="ad-container">
-        <div style="text-align: center; padding: 20px; color: #999;">
-          <div style="font-size: 48px; margin-bottom: 10px;">📢</div>
-          <div style="font-weight: 600; margin-bottom: 4px;">Spazio Pubblicitario</div>
-          <div style="font-size: 12px;">Google AdSense o partner pubblicitari</div>
-        </div>
+        <div style="height:90px"></div>
       </div>
+    </section>
 
-      <div class="ad-container">
-        <div style="text-align: center; padding: 20px; color: #999;">
-          <div style="font-size: 48px; margin-bottom: 10px;">⭐</div>
-          <div style="font-weight: 600; margin-bottom: 4px;">Upgrade Premium</div>
-          <div style="font-size: 12px;">Sblocca funzionalità avanzate</div>
+    <!-- ===== FORNITORI ===== -->
+    <section id="section-fornitori" class="section">
+      <div class="section-scroll">
+        <div class="search-bar-wrap">
+          <input type="text" id="fornitori-search" placeholder="🔍  Cerca fornitore..." class="search-input" oninput="renderFornitori()" />
         </div>
-      </div>
-
-      <div class="ad-container">
-        <div style="text-align: center; padding: 20px; color: #999;">
-          <div style="font-size: 48px; margin-bottom: 10px;">💡</div>
-          <div style="font-weight: 600; margin-bottom: 4px;">Tips & Tricks</div>
-          <div style="font-size: 12px;">Ottimizza i tuoi progetti</div>
+        <div class="filter-chips">
+          <button class="chip active" onclick="setFornitoriFilter('all',this)">Tutti</button>
+          <button class="chip" onclick="setFornitoriFilter('Muratore',this)">Muratore</button>
+          <button class="chip" onclick="setFornitoriFilter('Elettricista',this)">Elettricista</button>
+          <button class="chip" onclick="setFornitoriFilter('Idraulico',this)">Idraulico</button>
+          <button class="chip" onclick="setFornitoriFilter('Falegname',this)">Falegname</button>
+          <button class="chip" onclick="setFornitoriFilter('Altro',this)">Altro</button>
         </div>
+        <div id="fornitori-list"></div>
+        <div style="height:90px"></div>
       </div>
-    </aside>
+    </section>
 
-  </div><!-- end app-main -->
+    <!-- ===== SCADENZE ===== -->
+    <section id="section-scadenze" class="section">
+      <div class="section-scroll">
+        <div class="filter-chips">
+          <button class="chip active" onclick="setScadenzeFilter('all',this)">Tutte</button>
+          <button class="chip" onclick="setScadenzeFilter('upcoming',this)">Prossime 7gg</button>
+          <button class="chip" onclick="setScadenzeFilter('scaduta',this)">Scadute</button>
+        </div>
+        <div id="scadenze-list"></div>
+        <div style="height:90px"></div>
+      </div>
+    </section>
 
-  <!-- BOTTOM NAV (Mobile only) -->
+    <!-- ===== IMPOSTAZIONI ===== -->
+    <section id="section-impostazioni" class="section">
+      <div class="section-scroll">
+        <div class="card">
+          <div class="card-header"><span class="card-title">⚙️ Impostazioni Progetto</span></div>
+          <div class="form-group">
+            <label>Nome Progetto</label>
+            <input type="text" id="imp-nome" class="form-input" placeholder="Es. Ristrutturazione Casa" />
+          </div>
+          <div class="form-group">
+            <label>Indirizzo</label>
+            <input type="text" id="imp-indirizzo" class="form-input" placeholder="Via Roma 1, Milano" />
+          </div>
+          <div class="form-group">
+            <label>Budget Totale (€)</label>
+            <input type="number" id="imp-budget" class="form-input" placeholder="0.00" />
+          </div>
+          <div class="form-group">
+            <label>Data Inizio</label>
+            <input type="date" id="imp-data-inizio" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>Data Fine Prevista</label>
+            <input type="date" id="imp-data-fine" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label>Note</label>
+            <textarea id="imp-note" class="form-input form-textarea" placeholder="Note generali sul progetto..."></textarea>
+          </div>
+          <button class="btn-primary full-btn" onclick="salvaImpostazioni()">💾 Salva Impostazioni</button>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">🗑️ Zona Pericolosa</span></div>
+          <button class="btn-danger full-btn" onclick="eliminaProgettoCorrente()">🗑️ Elimina Progetto Corrente</button>
+          <button class="btn-outline full-btn mt-8" onclick="resetApp()">⚠️ Reset completo app</button>
+        </div>
+        <div style="height:90px"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- RIGHT SIDEBAR - ADS (Desktop only) -->
+  <aside class="ads-sidebar" id="ads-sidebar">
+    <div style="padding-bottom: 12px; color: #999; font-size: 11px; text-align: center; font-weight: 600; text-transform: uppercase;">📣 Annunci</div>
+    
+    <!-- AD SPACE 1 -->
+    <div class="ad-container">
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-xxxxxxxxxxxxxxxx" data-ad-slot="1234567890" data-ad-format="rectangle" data-full-width-responsive="false"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <!-- AD SPACE 2 -->
+    <div class="ad-container">
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-xxxxxxxxxxxxxxxx" data-ad-slot="0987654321" data-ad-format="rectangle" data-full-width-responsive="false"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <!-- AD SPACE 3 -->
+    <div class="ad-container">
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-xxxxxxxxxxxxxxxx" data-ad-slot="1111111111" data-ad-format="rectangle" data-full-width-responsive="false"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+  </aside>
+
+  <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
     <button class="nav-btn active" id="nav-dashboard" onclick="showSection('dashboard')">
       <span class="nav-icon">🏠</span>
@@ -291,123 +470,350 @@
 
 </div><!-- end #app -->
 
-<script>
-// ===== CORE FUNCTIONS =====
+<!-- ===================== MODALI ===================== -->
 
-function showSection(name) {
-  // Nascondi tutte le sezioni
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  
-  // Mostra la sezione selezionata
-  const sec = document.getElementById('section-' + name);
-  if (sec) sec.classList.add('active');
-  
-  const nav = document.getElementById('nav-' + name);
-  if (nav) nav.classList.add('active');
-  
-  // Aggiorna titolo header
-  const titles = {
-    'dashboard': '🏠 Dashboard',
-    'lavori': '🔨 Lavori',
-    'spese': '💸 Spese',
-    'computo': '📄 Computo',
-    'fornitori': '👷 Fornitori',
-    'scadenze': '📅 Scadenze',
-    'impostazioni': '⚙️ Impostazioni'
-  };
-  const headerCenter = document.getElementById('page-title-center');
-  if (headerCenter) headerCenter.textContent = titles[name] || name;
-  
-  closeSidebar();
-}
+<!-- MODAL: NUOVO PROGETTO -->
+<div id="modal-progetto" class="modal-overlay hidden">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3>Nuovo Progetto</h3>
+      <button class="modal-close" onclick="hideModal('modal-progetto')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nome Progetto *</label>
+        <input type="text" id="prog-nome" class="form-input" placeholder="Es. Ristrutturazione Appartamento" />
+      </div>
+      <div class="form-group">
+        <label>Indirizzo</label>
+        <input type="text" id="prog-indirizzo" class="form-input" placeholder="Via Roma 1, Milano" />
+      </div>
+      <div class="form-group">
+        <label>Budget Totale (€)</label>
+        <input type="number" id="prog-budget" class="form-input" placeholder="0.00" min="0" step="0.01" />
+      </div>
+      <div class="form-row">
+        <div class="form-group half">
+          <label>Data Inizio</label>
+          <input type="date" id="prog-data-inizio" class="form-input" />
+        </div>
+        <div class="form-group half">
+          <label>Data Fine</label>
+          <input type="date" id="prog-data-fine" class="form-input" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Note</label>
+        <textarea id="prog-note" class="form-input form-textarea" placeholder="Descrizione del progetto..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="hideModal('modal-progetto')">Annulla</button>
+      <button class="btn-primary" onclick="salvaProgetto()">Crea Progetto</button>
+    </div>
+  </div>
+</div>
 
-function toggleSidebar() {
-  document.getElementById('sidebar')?.classList.toggle('open');
-}
+<!-- MODAL: NUOVO LAVORO -->
+<div id="modal-lavoro" class="modal-overlay hidden">
+  <div class="modal-sheet modal-sheet-tall">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3 id="modal-lavoro-title">Nuovo Lavoro</h3>
+      <button class="modal-close" onclick="hideModal('modal-lavoro')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nome Lavoro *</label>
+        <input type="text" id="lav-nome" class="form-input" placeholder="Es. Demolizione pareti" />
+      </div>
+      <div class="form-group">
+        <label>Categoria</label>
+        <select id="lav-categoria" class="form-input">
+          <option value="Muratura">🧱 Muratura</option>
+          <option value="Impianti Elettrici">⚡ Impianti Elettrici</option>
+          <option value="Impianti Idraulici">🔧 Impianti Idraulici</option>
+          <option value="Pavimenti e Rivestimenti">🪵 Pavimenti e Rivestimenti</option>
+          <option value="Serramenti">🪟 Serramenti</option>
+          <option value="Pittura e Intonaci">🎨 Pittura e Intonaci</option>
+          <option value="Strutture">🏗️ Strutture</option>
+          <option value="Coperture">🏠 Coperture</option>
+          <option value="Altro">📦 Altro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Stato</label>
+        <select id="lav-stato" class="form-input">
+          <option value="da_fare">⬜ Da fare</option>
+          <option value="in_corso">🔄 In corso</option>
+          <option value="completato">✅ Completato</option>
+          <option value="sospeso">⏸️ Sospeso</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group half">
+          <label>Preventivo (€)</label>
+          <input type="number" id="lav-preventivo" class="form-input" placeholder="0.00" min="0" step="0.01" />
+        </div>
+        <div class="form-group half">
+          <label>% Avanzamento</label>
+          <input type="number" id="lav-avanzamento" class="form-input" placeholder="0" min="0" max="100" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group half">
+          <label>Data Inizio</label>
+          <input type="date" id="lav-data-inizio" class="form-input" />
+        </div>
+        <div class="form-group half">
+          <label>Data Fine Prevista</label>
+          <input type="date" id="lav-data-fine" class="form-input" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Fornitore/Impresa</label>
+        <select id="lav-fornitore" class="form-input">
+          <option value="">-- Nessuno --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Priorità</label>
+        <select id="lav-priorita" class="form-input">
+          <option value="normale">Normale</option>
+          <option value="alta">🔴 Alta</option>
+          <option value="bassa">🟢 Bassa</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Note</label>
+        <textarea id="lav-note" class="form-input form-textarea" placeholder="Descrizione dettagliata del lavoro..."></textarea>
+      </div>
+      <input type="hidden" id="lav-id" value="" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="hideModal('modal-lavoro')">Annulla</button>
+      <button class="btn-primary" onclick="salvaLavoro()">Salva Lavoro</button>
+    </div>
+  </div>
+</div>
 
-function closeSidebar() {
-  document.getElementById('sidebar')?.classList.remove('open');
-}
+<!-- MODAL: NUOVA SPESA -->
+<div id="modal-spesa" class="modal-overlay hidden">
+  <div class="modal-sheet modal-sheet-tall">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3 id="modal-spesa-title">Nuova Spesa</h3>
+      <button class="modal-close" onclick="hideModal('modal-spesa')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Descrizione *</label>
+        <input type="text" id="sp-desc" class="form-input" placeholder="Es. Acquisto mattonelle" />
+      </div>
+      <div class="form-group">
+        <label>Importo (€) *</label>
+        <input type="number" id="sp-importo" class="form-input" placeholder="0.00" min="0" step="0.01" />
+      </div>
+      <div class="form-group">
+        <label>Categoria</label>
+        <select id="sp-categoria" class="form-input">
+          <option value="Materiali">🧱 Materiali</option>
+          <option value="Manodopera">👷 Manodopera</option>
+          <option value="Noleggio">🚜 Noleggio</option>
+          <option value="Progettazione">📐 Progettazione</option>
+          <option value="Permessi">📋 Permessi/Pratiche</option>
+          <option value="Altro">📦 Altro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Data</label>
+        <input type="date" id="sp-data" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label>Lavoro Associato</label>
+        <select id="sp-lavoro" class="form-input">
+          <option value="">-- Nessuno --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Fornitore</label>
+        <select id="sp-fornitore" class="form-input">
+          <option value="">-- Nessuno --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Metodo Pagamento</label>
+        <select id="sp-pagamento" class="form-input">
+          <option value="Bonifico">Bonifico</option>
+          <option value="Contanti">Contanti</option>
+          <option value="Carta">Carta</option>
+          <option value="Assegno">Assegno</option>
+        </select>
+      </div>
+      <div class="form-group toggle-row">
+        <label>Ricevuta/Fattura presente</label>
+        <label class="toggle-switch">
+          <input type="checkbox" id="sp-ricevuta" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="form-group">
+        <label>Note</label>
+        <textarea id="sp-note" class="form-input form-textarea" placeholder="Note aggiuntive..."></textarea>
+      </div>
+      <input type="hidden" id="sp-id" value="" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="hideModal('modal-spesa')">Annulla</button>
+      <button class="btn-primary" onclick="salvaSpesa()">Salva Spesa</button>
+    </div>
+  </div>
+</div>
 
-function showModal(id) {
-  document.getElementById(id)?.classList.remove('hidden');
-}
+<!-- MODAL: NUOVO FORNITORE -->
+<div id="modal-fornitore" class="modal-overlay hidden">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3 id="modal-fornitore-title">Nuovo Fornitore</h3>
+      <button class="modal-close" onclick="hideModal('modal-fornitore')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nome / Ragione Sociale *</label>
+        <input type="text" id="forn-nome" class="form-input" placeholder="Es. Mario Rossi Costruzioni" />
+      </div>
+      <div class="form-group">
+        <label>Specializzazione</label>
+        <select id="forn-tipo" class="form-input">
+          <option value="Muratore">🧱 Muratore</option>
+          <option value="Elettricista">⚡ Elettricista</option>
+          <option value="Idraulico">🔧 Idraulico</option>
+          <option value="Falegname">🪵 Falegname</option>
+          <option value="Piastrellista">🪟 Piastrellista</option>
+          <option value="Imbianchino">🎨 Imbianchino</option>
+          <option value="Geometra">📐 Geometra/Architetto</option>
+          <option value="Altro">📦 Altro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Telefono</label>
+        <input type="tel" id="forn-tel" class="form-input" placeholder="+39 333 1234567" />
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="forn-email" class="form-input" placeholder="email@esempio.it" />
+      </div>
+      <div class="form-group">
+        <label>P.IVA / CF</label>
+        <input type="text" id="forn-piva" class="form-input" placeholder="IT12345678901" />
+      </div>
+      <div class="form-group">
+        <label>Valutazione</label>
+        <div class="star-rating" id="forn-rating-wrap">
+          <span class="star" onclick="setRating(1)">★</span>
+          <span class="star" onclick="setRating(2)">★</span>
+          <span class="star" onclick="setRating(3)">★</span>
+          <span class="star" onclick="setRating(4)">★</span>
+          <span class="star" onclick="setRating(5)">★</span>
+        </div>
+        <input type="hidden" id="forn-rating" value="0" />
+      </div>
+      <div class="form-group">
+        <label>Note</label>
+        <textarea id="forn-note" class="form-input form-textarea" placeholder="Affidabilità, note sui lavori svolti..."></textarea>
+      </div>
+      <input type="hidden" id="forn-id" value="" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="hideModal('modal-fornitore')">Annulla</button>
+      <button class="btn-primary" onclick="salvaFornitore()">Salva Fornitore</button>
+    </div>
+  </div>
+</div>
 
-function hideModal(id) {
-  document.getElementById(id)?.classList.add('hidden');
-}
+<!-- MODAL: NUOVA SCADENZA -->
+<div id="modal-scadenza" class="modal-overlay hidden">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3 id="modal-scadenza-title">Nuova Scadenza</h3>
+      <button class="modal-close" onclick="hideModal('modal-scadenza')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Titolo *</label>
+        <input type="text" id="sc-titolo" class="form-input" placeholder="Es. Consegna pavimenti" />
+      </div>
+      <div class="form-group">
+        <label>Data Scadenza *</label>
+        <input type="date" id="sc-data" class="form-input" />
+      </div>
+      <div class="form-group">
+        <label>Tipo</label>
+        <select id="sc-tipo" class="form-input">
+          <option value="lavoro">🔨 Milestone Lavoro</option>
+          <option value="pagamento">💰 Pagamento</option>
+          <option value="consegna">📦 Consegna Materiali</option>
+          <option value="collaudo">🔍 Collaudo/Ispezione</option>
+          <option value="pratica">📋 Pratica/Permesso</option>
+          <option value="altro">📌 Altro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Lavoro Associato</label>
+        <select id="sc-lavoro" class="form-input">
+          <option value="">-- Nessuno --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Note</label>
+        <textarea id="sc-note" class="form-input form-textarea" placeholder="Dettagli sulla scadenza..."></textarea>
+      </div>
+      <input type="hidden" id="sc-id" value="" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="hideModal('modal-scadenza')">Annulla</button>
+      <button class="btn-primary" onclick="salvaScadenza()">Salva Scadenza</button>
+    </div>
+  </div>
+</div>
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  if (t) {
-    t.textContent = msg;
-    t.classList.remove('hidden');
-    setTimeout(() => t.classList.add('hidden'), 2500);
-  }
-}
+<!-- MODAL: DETTAGLIO LAVORO -->
+<div id="modal-dettaglio-lavoro" class="modal-overlay hidden">
+  <div class="modal-sheet modal-sheet-tall">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <h3 id="det-lav-title">Dettaglio Lavoro</h3>
+      <button class="modal-close" onclick="hideModal('modal-dettaglio-lavoro')">✕</button>
+    </div>
+    <div class="modal-body" id="det-lav-body"></div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="hideModal('modal-dettaglio-lavoro')">Chiudi</button>
+      <button class="btn-primary" id="det-lav-edit-btn">✏️ Modifica</button>
+    </div>
+  </div>
+</div>
 
-function showPremiumModal() {
-  showToast('Premium - da implementare');
-}
+<!-- TOAST NOTIFICATION -->
+<div id="toast" class="toast hidden"></div>
 
-function handleAddBtn() {
-  showToast('Add button - da implementare');
-}
+<!-- CONFIRM DIALOG -->
+<div id="confirm-overlay" class="modal-overlay hidden">
+  <div class="modal-sheet confirm-sheet">
+    <div class="modal-body">
+      <div class="confirm-icon" id="confirm-icon">⚠️</div>
+      <h3 id="confirm-title">Sei sicuro?</h3>
+      <p id="confirm-msg">Questa azione non può essere annullata.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="hideConfirm(false)">Annulla</button>
+      <button class="btn-danger" id="confirm-ok-btn" onclick="hideConfirm(true)">Conferma</button>
+    </div>
+  </div>
+</div>
 
-function handleSignOut() {
-  showToast('Logout - da implementare');
-}
-
-function exportAllData() {
-  showToast('Export - da implementare');
-}
-
-function triggerImportBackup() {
-  document.getElementById('import-backup-input')?.click();
-}
-
-function importBackup(event) {
-  showToast('Import - da implementare');
-}
-
-function startFreeMode() {
-  document.getElementById('landing-page')?.classList.add('hidden');
-  document.getElementById('app')?.classList.remove('hidden');
-  showToast('✅ Modalità Free avviata');
-  showSection('dashboard');
-}
-
-function showLoginModal() {
-  showToast('Login - da implementare');
-}
-
-// Filter functions
-function setLavoriFilter(filter, btn) {
-  document.querySelectorAll('#section-lavori .chip').forEach(c => c.classList.remove('active'));
-  btn.classList.add('active');
-}
-
-function setSpeseFilter(filter, btn) {
-  document.querySelectorAll('#section-spese .chip').forEach(c => c.classList.remove('active'));
-  btn.classList.add('active');
-}
-
-function setFornitoriFilter(filter, btn) {
-  document.querySelectorAll('#section-fornitori .chip').forEach(c => c.classList.remove('active'));
-  btn.classList.add('active');
-}
-
-function setScadenzeFilter(filter, btn) {
-  document.querySelectorAll('#section-scadenze .chip').forEach(c => c.classList.remove('active'));
-  btn.classList.add('active');
-}
-
-// Init
-document.addEventListener('DOMContentLoaded', function() {
-  showSection('dashboard');
-});
-</script>
 <script type="module" src="js/app.js"></script>
 </body>
 </html>
