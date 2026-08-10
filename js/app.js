@@ -2,16 +2,23 @@
 // Importa tutti i moduli e li espone su window
 
 import { escHtml, uid, fmtEur, fmtData, daysDiff } from './utils/helpers.js';
-import { catIcons, catColors, spesaIcons, spesaColors, statoLabel, sectionTitles } from './utils/constants.js';
+import { catIcons, catColors, spesaIcons, spesaColors, statoLabel, sectionTitles, tipoScadenzaIcons } from './utils/constants.js';
 import { storageService } from './services/storageService.js';
 import { 
   showModal, hideModal, showToast, showConfirm, hideConfirm, 
   toggleSidebar, closeSidebar, showSection 
 } from './components/ui.js';
-import {
-  renderSidebar, selectProgetto, salvaProgetto, loadImpostazioni,
-  salvaImpostazioni, eliminaProgettoCorrente, resetApp
+import { 
+  renderDashboard, renderCatProgress, renderChartSpese, renderChartAndamento, 
+  renderDashScadenze, renderDashSpese 
+} from './components/dashboard.js';
+import { 
+  salvaProgetto, loadImpostazioni, salvaImpostazioni, eliminaProgettoCorrente, 
+  resetApp, renderSidebar, selectProgetto 
 } from './components/projects.js';
+import {
+  initAuth, handleSignUp, handleSignIn, handleSignOut, toggleAuthMode
+} from './components/auth.js';
 
 // State globali
 let lavoriFilter = 'all';
@@ -22,7 +29,7 @@ let currentRating = 0;
 
 function renderAll() {
   renderSidebar();
-  // Altre render functions verranno importate quando creati i componenti
+  renderDashboard();
 }
 
 function handleAddBtn() {
@@ -34,32 +41,30 @@ function handleAddBtn() {
     showModal('modal-progetto');
     return;
   }
-  if (id === 'section-lavori') window.openModalLavoro?.();
-  else if (id === 'section-spese') window.openModalSpesa?.();
-  else if (id === 'section-fornitori') window.openModalFornitore?.();
-  else if (id === 'section-scadenze') window.openModalScadenza?.();
-  else if (id === 'section-dashboard') showModal('modal-progetto');
-  else if (id === 'section-computo') document.getElementById('computo-file-input').click();
+  // TODO: Aggiungere funzioni quando componenti saranno creati
 }
 
 // Init
 window.addEventListener('DOMContentLoaded', () => {
-  storageService.loadData();
-  setTimeout(() => {
-    document.getElementById('splash-screen').style.opacity = '0';
-    setTimeout(() => {
-      document.getElementById('splash-screen').style.display = 'none';
-      document.getElementById('app').classList.remove('hidden');
-      renderAll();
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(() => {});
-      }
-    }, 400);
-  }, 1400);
-  window.setupDragDrop?.();
+  try {
+    initAuth();
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  } catch (e) {
+    console.error('Errore nell\'init:', e);
+  }
 });
 
-// ===== ESPONE FUNZIONI SU WINDOW =====
+// ===== ESPONE FUNZIONI SU WINDOW PER ONCLICK INLINE =====
+
+// Auth
+window.initAuth = initAuth;
+window.handleSignUp = handleSignUp;
+window.handleSignIn = handleSignIn;
+window.handleSignOut = handleSignOut;
+window.toggleAuthMode = toggleAuthMode;
+
 // UI
 window.showModal = showModal;
 window.hideModal = hideModal;
@@ -70,13 +75,18 @@ window.toggleSidebar = toggleSidebar;
 window.closeSidebar = closeSidebar;
 window.showSection = showSection;
 
+// Dashboard
+window.renderDashboard = renderDashboard;
+window.renderCatProgress = renderCatProgress;
+window.renderChartSpese = renderChartSpese;
+
 // Progetti
-window.selectProgetto = selectProgetto;
 window.salvaProgetto = salvaProgetto;
 window.loadImpostazioni = loadImpostazioni;
 window.salvaImpostazioni = salvaImpostazioni;
 window.eliminaProgettoCorrente = eliminaProgettoCorrente;
 window.resetApp = resetApp;
+window.selectProgetto = selectProgetto;
 
 // Globali
 window.renderAll = renderAll;
@@ -102,6 +112,15 @@ window.catColors = catColors;
 window.spesaIcons = spesaIcons;
 window.spesaColors = spesaColors;
 window.statoLabel = statoLabel;
+window.tipoScadenzaIcons = tipoScadenzaIcons;
 
 // Storage
 window.storageService = storageService;
+
+// TODO: Aggiungere funzioni degli altri componenti quando creati
+// - Lavori: openModalLavoro, salvaLavoro, renderLavori, setLavoriFilter, etc.
+// - Spese: openModalSpesa, salvaSpesa, renderSpese, setSpeseFilter, etc.
+// - Fornitori: openModalFornitore, salvaFornitore, renderFornitori, etc.
+// - Scadenze: openModalScadenza, salvaScadenza, renderScadenze, etc.
+// - Computo: setupDragDrop, importComputo, processComputoFile, etc.
+// - Backup: exportAllData, triggerImportBackup, importBackup
