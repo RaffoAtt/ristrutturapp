@@ -12,6 +12,14 @@ const initialState = {
   computoData: null
 };
 
+export function setFreemium(isFreemium) {
+  localStorage.setItem('isFreemium', JSON.stringify(isFreemium));
+}
+
+export function getFreemium() {
+  return JSON.parse(localStorage.getItem('isFreemium') || 'false');
+}
+
 export const storageService = {
   state: { ...initialState },
 

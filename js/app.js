@@ -88,6 +88,18 @@ window.eliminaProgettoCorrente = eliminaProgettoCorrente;
 window.resetApp = resetApp;
 window.selectProgetto = selectProgetto;
 
+// Freemium
+window.startFreeMode = function() {
+  storageService.setFreemium(true);
+  window.showAuthUI?.();
+  window.renderAll?.();
+  window.showToast?.('✅ Modalità Free avviata - 1 progetto disponibile');
+};
+
+window.showLoginModal = function() {
+  window.showLoginUI?.();
+};
+
 // Globali
 window.renderAll = renderAll;
 window.handleAddBtn = handleAddBtn;

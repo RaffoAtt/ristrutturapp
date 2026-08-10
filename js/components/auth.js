@@ -8,25 +8,39 @@ let currentUser = null;
 
 export async function initAuth() {
   try {
+    const splash = document.getElementById('splash-screen');
+    if (splash) splash.style.display = 'none';
+    
     currentUser = await supabaseService.getCurrentUser();
     if (currentUser) {
       console.log('User authenticated:', currentUser.email);
       showAuthUI();
     } else {
-      showLoginUI();
+      // Mostra landing page (non login direttamente)
+      showLandingPage();
     }
   } catch (error) {
     console.error('Auth init error:', error);
-    showLoginUI();
+    showLandingPage();
   }
+}
+
+export function showLandingPage() {
+  const app = document.getElementById('app');
+  const loginContainer = document.getElementById('login-container');
+  const landingPage = document.getElementById('landing-page');
+  
+  if (app) app.classList.add('hidden');
+  if (loginContainer) loginContainer.classList.add('hidden');
+  if (landingPage) landingPage.classList.remove('hidden');
 }
 
 export function showLoginUI() {
   const app = document.getElementById('app');
-  const splash = document.getElementById('splash-screen');
+  const landingPage = document.getElementById('landing-page');
   
-  if (splash) splash.style.display = 'none';
   if (app) app.classList.add('hidden');
+  if (landingPage) landingPage.classList.add('hidden');
   
   const loginContainer = document.getElementById('login-container');
   if (loginContainer) {
@@ -36,14 +50,12 @@ export function showLoginUI() {
 
 export function showAuthUI() {
   const loginContainer = document.getElementById('login-container');
+  const landingPage = document.getElementById('landing-page');
   const app = document.getElementById('app');
   
   if (loginContainer) loginContainer.classList.add('hidden');
-  if (app) {
-    app.classList.remove('hidden');
-    const splash = document.getElementById('splash-screen');
-    if (splash) splash.style.display = 'none';
-  }
+  if (landingPage) landingPage.classList.add('hidden');
+  if (app) app.classList.remove('hidden');
 }
 
 export async function handleSignUp() {

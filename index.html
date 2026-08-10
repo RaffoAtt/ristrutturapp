@@ -28,6 +28,40 @@
   </div>
 </div>
 
+<!-- LANDING PAGE -->
+<div id="landing-page" class="hidden">
+  <div style="display: flex; flex-direction: column; min-height: 100vh; background: linear-gradient(135deg, #007AFF 0%, #5AC8FA 100%); justify-content: center; align-items: center; padding: 20px;">
+    <div style="text-align: center; color: white; max-width: 500px;">
+      <div style="font-size: 80px; margin-bottom: 20px;">🏗️</div>
+      <h1 style="font-size: 36px; font-weight: 700; margin: 0 0 12px 0;">RistrutturaApp</h1>
+      <p style="font-size: 18px; opacity: 0.9; margin: 0 0 40px 0;">Gestisci i tuoi progetti di ristrutturazione</p>
+      
+      <div style="background: rgba(255, 255, 255, 0.2); padding: 30px; border-radius: 20px; margin-bottom: 30px; backdrop-filter: blur(10px);">
+        <h2 style="font-size: 20px; font-weight: 600; margin: 0 0 16px 0;">Piano Gratuito</h2>
+        <ul style="text-align: left; margin: 0; padding: 0; font-size: 14px; list-style: none;">
+          <li style="margin: 8px 0; display: flex; align-items: center; gap: 10px;">✅ <span>1 Progetto</span></li>
+          <li style="margin: 8px 0; display: flex; align-items: center; gap: 10px;">✅ <span>Lavori illimitati</span></li>
+          <li style="margin: 8px 0; display: flex; align-items: center; gap: 10px;">✅ <span>Spese illimitate</span></li>
+          <li style="margin: 8px 0; display: flex; align-items: center; gap: 10px;">✅ <span>Dashboard completa</span></li>
+          <li style="margin: 8px 0; display: flex; align-items: center; gap: 10px;">❌ <span style="opacity: 0.6;">Premium: progetti illimitati</span></li>
+        </ul>
+      </div>
+      
+      <button onclick="startFreeMode()" style="width: 100%; padding: 16px; background: white; color: #007AFF; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; margin-bottom: 12px;">
+        🎯 Inizia Gratuitamente
+      </button>
+      
+      <button onclick="showLoginModal()" style="width: 100%; padding: 16px; background: transparent; color: white; border: 2px solid white; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer;">
+        🔓 Accedi / Registrati
+      </button>
+      
+      <p style="font-size: 12px; color: rgba(255, 255, 255, 0.7); margin-top: 20px;">
+        Nessuna carta di credito richiesta
+      </p>
+    </div>
+  </div>
+</div>
+
 <!-- LOGIN CONTAINER -->
 <div id="login-container" class="hidden">
   <div class="login-wrapper">
@@ -382,6 +416,29 @@
     </section>
 
   </main>
+
+  <!-- RIGHT SIDEBAR - ADS (Desktop only) -->
+  <aside class="ads-sidebar" id="ads-sidebar">
+    <div style="padding-bottom: 12px; color: #999; font-size: 11px; text-align: center; font-weight: 600; text-transform: uppercase;">📣 Annunci</div>
+    
+    <!-- AD SPACE 1 -->
+    <div class="ad-container">
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-xxxxxxxxxxxxxxxx" data-ad-slot="1234567890" data-ad-format="rectangle" data-full-width-responsive="false"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <!-- AD SPACE 2 -->
+    <div class="ad-container">
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-xxxxxxxxxxxxxxxx" data-ad-slot="0987654321" data-ad-format="rectangle" data-full-width-responsive="false"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <!-- AD SPACE 3 -->
+    <div class="ad-container">
+      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-xxxxxxxxxxxxxxxx" data-ad-slot="1111111111" data-ad-format="rectangle" data-full-width-responsive="false"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+  </aside>
 
   <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
