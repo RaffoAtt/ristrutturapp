@@ -453,7 +453,9 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, BlinkMa
 @media (min-width: 1400px) {
   .ads-sidebar { display: block; }
 }
-.ad-container { background: var(--bg3); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 12px; min-height: 200px; display: flex; align-items: center; justify-content: center; color: var(--text3); font-size: 12px; }
+.ad-container { background: var(--bg3); border-radius: var(--radius-sm); padding: 8px; margin-bottom: 12px; min-height: 250px; display: block; width: 100%; }
+.ad-container ins { display: block !important; width: 100% !important; }
+.ad-container ins.adsbygoogle { min-height: 250px; }
 
 /* ===== EMPTY STATE ===== */
 .empty-state { text-align: center; padding: 40px 20px; color: var(--text3); }
