@@ -3,7 +3,7 @@
 
 import { escHtml, uid, fmtEur, fmtData, daysDiff } from './utils/helpers.js';
 import { catIcons, catColors, spesaIcons, spesaColors, statoLabel, sectionTitles, tipoScadenzaIcons } from './utils/constants.js';
-import { storageService } from './services/storageService.js';
+import { storageService, setFreemium, getFreemium } from './services/storageService.js';
 import { 
   showModal, hideModal, showToast, showConfirm, hideConfirm, 
   toggleSidebar, closeSidebar, showSection 
@@ -92,14 +92,26 @@ window.selectProgetto = selectProgetto;
 
 // Freemium
 window.startFreeMode = function() {
-  storageService.setFreemium(true);
-  window.showAuthUI?.();
-  window.renderAll?.();
-  window.showToast?.('✅ Modalità Free avviata - 1 progetto disponibile');
+  try {
+    setFreemium(true);
+    // Mostra l'app nascondendo la landing page
+    const landingPage = document.getElementById('landing-page');
+    const app = document.getElementById('app');
+    if (landingPage) landingPage.classList.add('hidden');
+    if (app) app.classList.remove('hidden');
+    window.showToast?.('✅ Modalità Free avviata - 1 progetto disponibile');
+  } catch (e) {
+    console.error('Errore startFreeMode:', e);
+    window.showToast?.('❌ Errore: ' + e.message);
+  }
 };
 
 window.showLoginModal = function() {
-  window.showLoginUI?.();
+  try {
+    window.showLoginUI?.();
+  } catch (e) {
+    console.error('Errore showLoginModal:', e);
+  }
 };
 
 // Globali
