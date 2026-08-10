@@ -48,6 +48,12 @@ function handleAddBtn() {
 // Init
 window.addEventListener('DOMContentLoaded', () => {
   try {
+    // Nascondi splash screen e mostra direttamente l'app
+    setTimeout(() => {
+      document.getElementById('splash-screen').style.display = 'none';
+      document.getElementById('app').classList.remove('hidden');
+    }, 1500);
+    
     initAuth();
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(() => {});
