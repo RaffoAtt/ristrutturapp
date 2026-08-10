@@ -17,7 +17,7 @@ import {
   resetApp, renderSidebar, selectProgetto 
 } from './components/projects.js';
 import {
-  initAuth, handleSignUp, handleSignIn, handleSignOut, toggleAuthMode
+  initAuth, handleSignUp, handleSignIn, handleSignOut, toggleAuthMode, showAuthUI, showLoginUI
 } from './components/auth.js';
 
 // State globali
@@ -64,6 +64,8 @@ window.handleSignUp = handleSignUp;
 window.handleSignIn = handleSignIn;
 window.handleSignOut = handleSignOut;
 window.toggleAuthMode = toggleAuthMode;
+window.showAuthUI = showAuthUI;
+window.showLoginUI = showLoginUI;
 
 // UI
 window.showModal = showModal;
