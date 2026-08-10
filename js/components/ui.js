@@ -56,13 +56,5 @@ export function showSection(name) {
   if (sec) sec.classList.add('active');
   const nav = document.getElementById('nav-' + name);
   if (nav) nav.classList.add('active');
-  // Update page title in header
-  const pageTitle = sectionTitles[name] || name;
-  const headerCenter = document.getElementById('page-title-center');
-  if (headerCenter) headerCenter.textContent = pageTitle;
-  // For backward compatibility (mobile)
-  const legacyTitle = document.getElementById('page-title');
-  if (legacyTitle) legacyTitle.textContent = pageTitle;
-  // Auto-close sidebar on mobile when section changes
-  closeSidebar();
+  document.getElementById('page-title').textContent = sectionTitles[name] || name;
 }

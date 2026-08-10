@@ -3,7 +3,7 @@
 
 import { escHtml, uid, fmtEur, fmtData, daysDiff } from './utils/helpers.js';
 import { catIcons, catColors, spesaIcons, spesaColors, statoLabel, sectionTitles, tipoScadenzaIcons } from './utils/constants.js';
-import { storageService, setFreemium, getFreemium } from './services/storageService.js';
+import { storageService } from './services/storageService.js';
 import { 
   showModal, hideModal, showToast, showConfirm, hideConfirm, 
   toggleSidebar, closeSidebar, showSection 
@@ -16,8 +16,9 @@ import {
   salvaProgetto, loadImpostazioni, salvaImpostazioni, eliminaProgettoCorrente, 
   resetApp, renderSidebar, selectProgetto 
 } from './components/projects.js';
-import {
-  initAuth, handleSignUp, handleSignIn, handleSignOut, toggleAuthMode, showAuthUI, showLoginUI
+import { 
+  initAuth, handleSignUp, handleSignIn, handleSignOut, toggleAuthMode,
+  showAuthUI, showLoginUI, showLandingPage
 } from './components/auth.js';
 
 // State globali
@@ -66,6 +67,7 @@ window.handleSignOut = handleSignOut;
 window.toggleAuthMode = toggleAuthMode;
 window.showAuthUI = showAuthUI;
 window.showLoginUI = showLoginUI;
+window.showLandingPage = showLandingPage;
 
 // UI
 window.showModal = showModal;
@@ -92,26 +94,15 @@ window.selectProgetto = selectProgetto;
 
 // Freemium
 window.startFreeMode = function() {
-  try {
-    setFreemium(true);
-    // Mostra l'app nascondendo la landing page
-    const landingPage = document.getElementById('landing-page');
-    const app = document.getElementById('app');
-    if (landingPage) landingPage.classList.add('hidden');
-    if (app) app.classList.remove('hidden');
-    window.showToast?.('✅ Modalità Free avviata - 1 progetto disponibile');
-  } catch (e) {
-    console.error('Errore startFreeMode:', e);
-    window.showToast?.('❌ Errore: ' + e.message);
-  }
+  storageService.setFreemium(true);
+  storageService.loadData();
+  window.showAuthUI();
+  window.renderAll?.();
+  window.showToast?.('✅ Modalità Free avviata - 1 progetto disponibile');
 };
 
 window.showLoginModal = function() {
-  try {
-    window.showLoginUI?.();
-  } catch (e) {
-    console.error('Errore showLoginModal:', e);
-  }
+  window.showLoginUI?.();
 };
 
 // Globali
