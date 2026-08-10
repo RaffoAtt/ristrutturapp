@@ -3,7 +3,7 @@
 
 import { escHtml, uid, fmtEur, fmtData, daysDiff } from './utils/helpers.js';
 import { catIcons, catColors, spesaIcons, spesaColors, statoLabel, sectionTitles, tipoScadenzaIcons } from './utils/constants.js';
-import { storageService } from './services/storageService.js';
+import { storageService, setFreemium } from './services/storageService.js';
 import { 
   showModal, hideModal, showToast, showConfirm, hideConfirm, 
   toggleSidebar, closeSidebar, showSection 
@@ -94,7 +94,7 @@ window.selectProgetto = selectProgetto;
 
 // Freemium
 window.startFreeMode = function() {
-  storageService.setFreemium(true);
+  setFreemium(true);
   storageService.loadData();
   window.showAuthUI();
   window.renderAll?.();
