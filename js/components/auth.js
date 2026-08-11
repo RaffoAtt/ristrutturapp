@@ -62,6 +62,7 @@ export async function handleSignUp() {
   const email = document.getElementById('signup-email')?.value;
   const password = document.getElementById('signup-password')?.value;
   const passwordConfirm = document.getElementById('signup-password-confirm')?.value;
+  const consentiCheckbox = document.getElementById('signup-consent');
   
   if (!email || !password || !passwordConfirm) {
     showToast('⚠️ Compila tutti i campi');
@@ -78,15 +79,18 @@ export async function handleSignUp() {
     return;
   }
   
+  if (!consentiCheckbox || !consentiCheckbox.checked) {
+    showToast('❌ Devi accettare i Termini e la Privacy Policy');
+    return;
+  }
+  
   try {
     const result = await supabaseService.signUp(email, password);
     if (result.success) {
       showToast('✅ Registrazione completata! Controlla la tua email');
-      // Reset form
       document.getElementById('signup-email').value = '';
       document.getElementById('signup-password').value = '';
       document.getElementById('signup-password-confirm').value = '';
-      // Switch to login
       toggleAuthMode();
     } else {
       showToast('❌ ' + result.error);
