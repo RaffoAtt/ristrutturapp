@@ -3,6 +3,7 @@
 import { uid, escHtml, fmtEur, fmtData } from '../utils/helpers.js';
 import { storageService } from '../services/storageService.js';
 import { showModal, hideModal, showToast, showConfirm, closeSidebar } from './ui.js';
+import { saveProgettoToSupabase } from '../services/syncService.js';
 
 export function renderSidebar() {
   const list = document.getElementById('progetti-list');
@@ -36,6 +37,7 @@ export function salvaProgetto() {
   storageService.state.progetti.push(obj);
   storageService.state.progettoAttivoId = obj.id;
   storageService.saveData();
+  saveProgettoToSupabase(obj).catch(e => console.warn('Supabase non disponibile:', e));
   hideModal('modal-progetto');
   window.renderAll();
   showToast('✅ Progetto creato: ' + nome);

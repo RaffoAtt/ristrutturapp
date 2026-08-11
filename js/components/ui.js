@@ -21,6 +21,21 @@ export function showToast(msg, duration = 2500) {
   toastTimer = setTimeout(() => t.classList.add('hidden'), duration);
 }
 
+export function showToastPersistent(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = null;
+}
+
+export function hideToast() {
+  const t = document.getElementById('toast');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = null;
+  t.classList.add('hidden');
+}
+
 export function showConfirm(title, msg, icon, cb) {
   document.getElementById('confirm-title').textContent = title;
   document.getElementById('confirm-msg').textContent = msg;
@@ -50,11 +65,18 @@ export function closeSidebar() {
 }
 
 export function showSection(name) {
+  // Nascondi tutte le sezioni
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  // Rimuovi active da tutti i nav (bottom bar e sidebar)
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  // Mostra la sezione selezionata
   const sec = document.getElementById('section-' + name);
   if (sec) sec.classList.add('active');
-  const nav = document.getElementById('nav-' + name);
-  if (nav) nav.classList.add('active');
-  document.getElementById('page-title').textContent = sectionTitles[name] || name;
+  // Aggiorna nav nella sidebar (ID formato: nav-dashboard-sidebar)
+  const navSidebar = document.getElementById('nav-' + name + '-sidebar');
+  if (navSidebar) navSidebar.classList.add('active');
+  // Aggiorna page title se esiste
+  const pageTitle = document.getElementById('page-title');
+  if (pageTitle) pageTitle.textContent = sectionTitles[name] || name;
 }

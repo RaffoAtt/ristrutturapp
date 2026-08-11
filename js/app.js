@@ -18,8 +18,21 @@ import {
 } from './components/projects.js';
 import { 
   initAuth, handleSignUp, handleSignIn, handleSignOut, toggleAuthMode,
-  showAuthUI, showLoginUI, showLandingPage
+  showAuthUI, showLoginUI, showLandingPage, hideLoginUI
 } from './components/auth.js';
+import {
+  importComputo, clearComputo, toggleVoce, toggleSelectAll, importVociSelezionate
+} from './components/computo.js';
+import {
+  renderLavori, setLavoriFilter, openModalLavoro, salvaLavoro, editLavoro,
+  deleteLavoroConfirm, openDettaglioLavoro, deleteComputoGroupConfirm,
+  setLavoroStato, avanzaLavoro,
+  renderSpese, setSpeseFilter, openModalSpesa, salvaSpesa, editSpesa, deleteSpesaConfirm,
+  renderFornitori, setFornitoriFilter, openModalFornitore, salvaFornitore, editFornitore,
+  deleteFornitoreConfirm, setRating,
+  renderScadenze, setScadenzeFilter, openModalScadenza, salvaScadenza, editScadenza,
+  deleteScadenzaConfirm
+} from './components/list.js';
 
 // State globali
 let lavoriFilter = 'all';
@@ -31,6 +44,10 @@ let currentRating = 0;
 function renderAll() {
   renderSidebar();
   renderDashboard();
+  renderLavori();
+  renderSpese();
+  renderFornitori();
+  renderScadenze();
 }
 
 function handleAddBtn() {
@@ -42,13 +59,21 @@ function handleAddBtn() {
     showModal('modal-progetto');
     return;
   }
-  // TODO: Aggiungere funzioni quando componenti saranno creati
+  if (id === 'section-lavori') openModalLavoro();
+  else if (id === 'section-spese') openModalSpesa();
+  else if (id === 'section-fornitori') openModalFornitore();
+  else if (id === 'section-scadenze') openModalScadenza();
+  else if (id === 'section-computo') document.getElementById('computo-file-input')?.click();
+  else showModal('modal-progetto');
 }
 
 // Init
 window.addEventListener('DOMContentLoaded', () => {
   try {
-    // Nascondi splash screen e mostra direttamente l'app
+    // Carica i dati persistenti dal localStorage
+    storageService.loadData();
+
+    // Nascondi lo splash e mostra sempre l'app direttamente
     setTimeout(() => {
       document.getElementById('splash-screen').style.display = 'none';
       document.getElementById('app').classList.remove('hidden');
@@ -74,6 +99,7 @@ window.toggleAuthMode = toggleAuthMode;
 window.showAuthUI = showAuthUI;
 window.showLoginUI = showLoginUI;
 window.showLandingPage = showLandingPage;
+window.hideLoginUI = hideLoginUI;
 
 // UI
 window.showModal = showModal;
@@ -148,6 +174,50 @@ window.tipoScadenzaIcons = tipoScadenzaIcons;
 
 // Storage
 window.storageService = storageService;
+
+// Computo
+window.importComputo = importComputo;
+window.clearComputo = clearComputo;
+window.toggleVoce = toggleVoce;
+window.toggleSelectAll = toggleSelectAll;
+window.importVociSelezionate = importVociSelezionate;
+
+// Lavori
+window.renderLavori = renderLavori;
+window.setLavoriFilter = setLavoriFilter;
+window.openModalLavoro = openModalLavoro;
+window.salvaLavoro = salvaLavoro;
+window.editLavoro = editLavoro;
+window.deleteLavoroConfirm = deleteLavoroConfirm;
+window.openDettaglioLavoro = openDettaglioLavoro;
+window.deleteComputoGroupConfirm = deleteComputoGroupConfirm;
+window.setLavoroStato = setLavoroStato;
+window.avanzaLavoro = avanzaLavoro;
+
+// Spese
+window.renderSpese = renderSpese;
+window.setSpeseFilter = setSpeseFilter;
+window.openModalSpesa = openModalSpesa;
+window.salvaSpesa = salvaSpesa;
+window.editSpesa = editSpesa;
+window.deleteSpesaConfirm = deleteSpesaConfirm;
+
+// Fornitori
+window.renderFornitori = renderFornitori;
+window.setFornitoriFilter = setFornitoriFilter;
+window.openModalFornitore = openModalFornitore;
+window.salvaFornitore = salvaFornitore;
+window.editFornitore = editFornitore;
+window.deleteFornitoreConfirm = deleteFornitoreConfirm;
+window.setRating = setRating;
+
+// Scadenze
+window.renderScadenze = renderScadenze;
+window.setScadenzeFilter = setScadenzeFilter;
+window.openModalScadenza = openModalScadenza;
+window.salvaScadenza = salvaScadenza;
+window.editScadenza = editScadenza;
+window.deleteScadenzaConfirm = deleteScadenzaConfirm;
 
 // TODO: Aggiungere funzioni degli altri componenti quando creati
 // - Lavori: openModalLavoro, salvaLavoro, renderLavori, setLavoriFilter, etc.
