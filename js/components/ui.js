@@ -59,9 +59,14 @@ export function toggleSidebar() {
 }
 
 export function closeSidebar() {
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebar').classList.add('hidden');
-  document.getElementById('sidebar-overlay').classList.add('hidden');
+  const sb = document.getElementById('sidebar');
+  // Non nascondere la sidebar desktop (sempre visibile su schermi grandi)
+  if (sb && !sb.classList.contains('sidebar-desktop')) {
+    sb.classList.remove('open');
+    sb.classList.add('hidden');
+  }
+  const ov = document.getElementById('sidebar-overlay');
+  if (ov) ov.classList.add('hidden');
 }
 
 export function showSection(name) {
