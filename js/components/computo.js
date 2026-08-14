@@ -112,12 +112,15 @@ Esempio: [{"descrizione":"Demolizione muratura","categoria":"Muratura","quantita
 Testo computo:
 ${text.substring(0, 14000)}`;
 
+  // Se usa il proxy Vercel (/api/gemini), non serve inviare la chiave
+  // La chiave è gestita lato server dalla Serverless Function
+  const isProxy = AI_CONFIG.GEMINI_ENDPOINT.startsWith('/');
+  const headers = { 'Content-Type': 'application/json' };
+  if (!isProxy) headers['x-goog-api-key'] = AI_CONFIG.GEMINI_API_KEY;
+
   const response = await fetch(AI_CONFIG.GEMINI_ENDPOINT, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-goog-api-key': AI_CONFIG.GEMINI_API_KEY
-    },
+    headers,
     body: JSON.stringify({
       model: AI_CONFIG.GEMINI_MODEL,
       input: prompt
