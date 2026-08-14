@@ -64,11 +64,21 @@ export async function signOut() {
 export async function getCurrentUser() {
   try {
     const client = await initSupabase();
+    if (!client) return null;
     const { data: { user }, error } = await client.auth.getUser();
-    if (error) throw error;
+    if (error) {
+      // AuthSessionMissingError è normale quando non si è autenticati, non loggare
+      if (error.name === 'AuthSessionMissingError' || error.message?.includes('session')) {
+        return null;
+      }
+      throw error;
+    }
     return user;
   } catch (error) {
-    console.error('getCurrentUser error:', error);
+    // Non loggare errori di sessione mancante (normale per utenti ospite)
+    if (!error.message?.includes('session') && !error.message?.includes('Session')) {
+      console.error('getCurrentUser error:', error);
+    }
     return null;
   }
 }
