@@ -112,20 +112,25 @@ Esempio: [{"descrizione":"Demolizione muratura","categoria":"Muratura","quantita
 Testo computo:
 ${text.substring(0, 14000)}`;
 
-  // Se usa il proxy Vercel (/api/gemini), non serve inviare la chiave
-  // La chiave è gestita lato server dalla Serverless Function
   const isProxy = AI_CONFIG.GEMINI_ENDPOINT.startsWith('/');
-  const headers = { 'Content-Type': 'application/json' };
-  if (!isProxy) headers['x-goog-api-key'] = AI_CONFIG.GEMINI_API_KEY;
+  const directHeaders = { 'Content-Type': 'application/json', 'x-goog-api-key': AI_CONFIG.GEMINI_API_KEY };
+  const proxyHeaders = { 'Content-Type': 'application/json' };
 
-  const response = await fetch(AI_CONFIG.GEMINI_ENDPOINT, {
+  let response = await fetch(AI_CONFIG.GEMINI_ENDPOINT, {
     method: 'POST',
-    headers,
-    body: JSON.stringify({
-      model: AI_CONFIG.GEMINI_MODEL,
-      input: prompt
-    })
+    headers: isProxy ? proxyHeaders : directHeaders,
+    body: JSON.stringify({ model: AI_CONFIG.GEMINI_MODEL, input: prompt })
   });
+
+  // Fallback: se il proxy Vercel non è configurato, usa Gemini direttamente
+  if (!response.ok && isProxy && [401, 404, 500].includes(response.status)) {
+    console.warn('Proxy non disponibile (status ' + response.status + '), fallback a Gemini diretto');
+    response = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
+      method: 'POST',
+      headers: directHeaders,
+      body: JSON.stringify({ model: AI_CONFIG.GEMINI_MODEL, input: prompt })
+    });
+  }
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
