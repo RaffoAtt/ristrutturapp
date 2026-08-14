@@ -191,9 +191,15 @@ export async function handleSignOut() {
     const result = await supabaseService.signOut();
     if (result.success) {
       currentUser = null;
-      // Pulisci il localStorage per non lasciare i dati di questo utente visibili
+      // Pulisci il localStorage E resetta lo state in memoria
       localStorage.removeItem('ristrutturaApp_v2');
-      window.storageService?.loadData?.();
+      // Resetta esplicitamente lo state (loadData non fa nulla se localStorage è vuoto)
+      if (window.storageService) {
+        window.storageService.state = {
+          progetti: [], progettoAttivoId: null,
+          lavori: [], spese: [], fornitori: [], scadenze: [], computoData: null
+        };
+      }
       showToast('✅ Logout completato');
       // Resetta UI sidebar
       const progettoAttivoEl = document.getElementById('progetto-attivo-name');
