@@ -146,6 +146,60 @@ window.showPremiumModal = function() {
   window.showToast?.('🌟 Funzionalità Premium - Contatta il supporto per l\'upgrade');
 };
 
+// Modal Privacy Policy e Termini di Servizio
+window.showLegalModal = function(type) {
+  const title = document.getElementById('modal-legal-title');
+  const body = document.getElementById('modal-legal-body');
+  if (!title || !body) return;
+  if (type === 'privacy') {
+    title.textContent = 'Privacy Policy';
+    body.innerHTML = `<h4 style="margin:0 0 8px">Informativa sulla Privacy</h4>
+      <p><strong>In vigore dal:</strong> 11 Agosto 2026</p>
+      <h4 style="margin:16px 0 6px">Dati che raccogliamo</h4>
+      <ul style="padding-left:18px;margin:0">
+        <li>Email e password (autenticazione)</li>
+        <li>Dati di progetto: nome, indirizzo, budget</li>
+        <li>Dati di lavoro, spese, fornitori, scadenze</li>
+      </ul>
+      <h4 style="margin:16px 0 6px">Come usiamo i dati</h4>
+      <ul style="padding-left:18px;margin:0">
+        <li>Per fornire e migliorare il servizio</li>
+        <li>Per sincronizzare i dati tra dispositivi</li>
+        <li>Non vendiamo i tuoi dati a terzi</li>
+      </ul>
+      <h4 style="margin:16px 0 6px">Archiviazione</h4>
+      <p>I dati sono archiviati su <strong>Supabase</strong> (server UE, conforme GDPR). La password è sempre crittografata.</p>
+      <h4 style="margin:16px 0 6px">I tuoi diritti (GDPR)</h4>
+      <ul style="padding-left:18px;margin:0">
+        <li>Accesso, rettifica e cancellazione dei dati</li>
+        <li>Portabilità dei dati (Esporta Backup)</li>
+        <li>Opposizione al trattamento</li>
+      </ul>
+      <p style="margin-top:12px">Contatti: <strong>privacy@ristrutturapp.it</strong></p>`;
+  } else {
+    title.textContent = 'Termini di Servizio';
+    body.innerHTML = `<h4 style="margin:0 0 8px">Termini di Servizio</h4>
+      <p><strong>In vigore dal:</strong> 11 Agosto 2026</p>
+      <h4 style="margin:16px 0 6px">Il Servizio</h4>
+      <p>RistrutturaApp è un'app per la gestione di progetti di ristrutturazione edile: lavori, spese, fornitori e scadenze.</p>
+      <h4 style="margin:16px 0 6px">Piano Gratuito</h4>
+      <ul style="padding-left:18px;margin:0">
+        <li>Fino a 3 progetti attivi</li>
+        <li>Fino a 50 lavori per progetto</li>
+        <li>Tutte le funzionalità base incluse</li>
+      </ul>
+      <h4 style="margin:16px 0 6px">Responsabilità</h4>
+      <p>Il servizio è fornito "così com'è". Esegui backup regolari tramite "Esporta Backup". Non siamo responsabili per perdita di dati.</p>
+      <h4 style="margin:16px 0 6px">Account</h4>
+      <ul style="padding-left:18px;margin:0">
+        <li>Sei responsabile della sicurezza delle credenziali</li>
+        <li>Account inattivi da 12 mesi possono essere rimossi</li>
+      </ul>
+      <p style="margin-top:12px">Contatti: <strong>info@ristrutturapp.it</strong></p>`;
+  }
+  document.getElementById('modal-legal').classList.remove('hidden');
+};
+
 // Globali
 window.renderAll = renderAll;
 window.handleAddBtn = handleAddBtn;
