@@ -98,7 +98,16 @@ export function showLoginUI() {
   const signupForm = document.getElementById('signup-form');
   if (loginForm) loginForm.classList.remove('hidden');
   if (signupForm) signupForm.classList.add('hidden');
-  // Apre il login come overlay modale sopra l'app
+  const loginContainer = document.getElementById('login-container');
+  if (loginContainer) loginContainer.classList.remove('hidden');
+}
+
+export function showSignUpUI() {
+  // Mostra direttamente il form di registrazione
+  const loginForm = document.getElementById('login-form');
+  const signupForm = document.getElementById('signup-form');
+  if (loginForm) loginForm.classList.add('hidden');
+  if (signupForm) signupForm.classList.remove('hidden');
   const loginContainer = document.getElementById('login-container');
   if (loginContainer) loginContainer.classList.remove('hidden');
 }

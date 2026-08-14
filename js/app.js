@@ -18,7 +18,7 @@ import {
 } from './components/projects.js';
 import { 
   initAuth, handleSignUp, handleSignIn, handleSignOut, toggleAuthMode,
-  showAuthUI, showLoginUI, showLandingPage, hideLoginUI
+  showAuthUI, showLoginUI, showLandingPage, hideLoginUI, showSignUpUI
 } from './components/auth.js';
 import {
   importComputo, clearComputo, toggleVoce, toggleSelectAll, importVociSelezionate
@@ -137,10 +137,7 @@ window.showLoginModal = function() {
   window.showLoginUI?.();
 };
 
-window.showSignUpUI = function() {
-  window.toggleAuthMode?.();
-  window.showLoginUI?.();
-};
+window.showSignUpUI = showSignUpUI;
 
 window.showPremiumModal = function() {
   window.showToast?.('🌟 Funzionalità Premium - Contatta il supporto per l\'upgrade');
