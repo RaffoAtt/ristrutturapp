@@ -467,7 +467,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, BlinkMa
 /* ===== MISC ===== */
 .full-btn { width: 100%; }
 .text-center { text-align: center; }
-select.form-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238E8E93' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+select.form-input { background-image: url("data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2712%27 height=%278%27 viewBox=%270 0 12 8%27%3E%3Cpath d=%27M1 1l5 5 5-5%27 stroke=%27%238E8E93%27 stroke-width=%271.5%27 fill=%27none%27 stroke-linecap=%27round%27/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
 
 /* ===== RESPONSIVE ===== */
 @media (min-width: 480px) {
@@ -477,3 +477,70 @@ select.form-input { background-image: url("data:image/svg+xml,%3Csvg xmlns='http
   .kpi-grid { grid-template-columns: repeat(2, 1fr); }
   .hero-amount { font-size: 26px; }
 }
+
+/* ===== CLIENT MODE - sola lettura ===== */
+/* body.client-mode = aggiunta da roleService.js quando l'utente ha ruolo 'client' */
+
+/* FAB (+) pulsante aggiungi */
+body.client-mode #fab-add { display: none !important; }
+
+/* Pulsante Upgrade Premium nella sidebar */
+body.client-mode .sidebar-premium { display: none !important; }
+
+/* Pulsante + Nuovo Progetto nella sidebar */
+body.client-mode .sidebar-new-btn { display: none !important; }
+
+/* Sezione ALTRO (Esporta/Importa backup) nella sidebar */
+body.client-mode .sidebar-section:last-of-type { display: none !important; }
+
+/* Bottoni azione su card */
+body.client-mode .spesa-card-actions { display: none !important; }
+body.client-mode .forn-actions .action-btn { display: none !important; }
+body.client-mode .action-btn { display: none !important; }
+
+/* Pulsanti Modifica/Elimina */
+body.client-mode #det-lav-edit-btn { display: none !important; }
+body.client-mode .card-link.danger { display: none !important; }
+
+/* Zona Pericolosa nelle impostazioni - nascosta via classe aggiunta da JS */
+body.client-mode .danger-zone-card { display: none !important; }
+
+/* Nascondi voce impostazioni dalla navigazione */
+body.client-mode .sidebar-list li.nav-impostazioni { display: none !important; }
+
+/* Campi form in sola lettura nelle impostazioni */
+body.client-mode #section-impostazioni .form-input { pointer-events: none; opacity: 0.65; background: var(--bg3); }
+body.client-mode #section-impostazioni .btn-primary { display: none !important; }
+
+/* Nascondi card di importazione nel computo */
+body.client-mode #section-computo .card-import { display: none !important; }
+body.client-mode #section-computo .voce-check-item input[type=checkbox] { pointer-events: none; opacity: 0.5; }
+body.client-mode #section-computo .card-link { display: none !important; }
+body.client-mode #section-computo .full-btn { display: none !important; }
+
+/* Barra superiore indicatore sola lettura (elemento aggiunto da roleService.js) */
+#client-readonly-bar {
+  background: rgba(0, 122, 255, 0.08);
+  border-bottom: 1px solid rgba(0, 122, 255, 0.15);
+  color: #007AFF;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+  padding: 6px;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+  width: 100%;
+}
+
+/* Nascondi pulsante registrazione per i client */
+body.client-mode .sidebar-auth .btn-auth-signup { display: none !important; }
+</content>
+<task_progress>
+- [x] Analizzare auth.js per capire il flusso di login
+- [x] Creare roleService.js
+- [x] Aggiornare auth.js per usare roleService dopo il login
+- [x] Aggiornare app.js per importare roleService
+- [x] Aggiungere CSS client-mode a app.css
+- [ ] Creare SQL schema per sistema ruoli
+- [ ] Documentare feature suggerite
+</task_progress>

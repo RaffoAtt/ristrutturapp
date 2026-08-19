@@ -4,6 +4,7 @@
 import { supabaseService } from '../services/supabaseService.js';
 import { showToast } from './ui.js';
 import { loadFromSupabase } from '../services/syncService.js';
+import { roleService } from '../services/roleService.js';
 
 let currentUser = null;
 
@@ -20,8 +21,9 @@ export async function initAuth() {
     currentUser = await supabaseService.getCurrentUser();
     updateSidebarAuth();
 
-    // Se autenticato, carica i dati da Supabase
+    // Se autenticato, carica dati e applica ruolo
     if (currentUser) {
+      await _applyRoleForUser(currentUser);
       await loadFromSupabase();
       window.renderAll?.();
     } else {
@@ -31,6 +33,16 @@ export async function initAuth() {
     console.error('Auth init error:', error);
     updateSidebarAuth();
     showGuestWarning();
+  }
+}
+
+// Recupera il profilo e applica la modalità corretta (admin o client)
+async function _applyRoleForUser(user) {
+  const profile = await roleService.fetchUserProfile(user.id);
+  if (roleService.isClient()) {
+    roleService.applyClientMode(profile);
+  } else {
+    roleService.removeClientMode();
   }
 }
 
@@ -174,10 +186,17 @@ export async function handleSignIn() {
     const result = await supabaseService.signIn(email, password);
     if (result.success) {
       currentUser = result.user;
-      showToast('✅ Benvenuto, ' + currentUser.email + '!');
+      // Rileva il ruolo PRIMA di renderizzare
+      await _applyRoleForUser(currentUser);
+      const welcomeName = roleService.getCurrentProfile()?.display_name || currentUser.email;
+      showToast('✅ Benvenuto, ' + welcomeName + '!');
       showAuthUI();
       await loadFromSupabase();
       window.renderAll?.();
+      // Se è un client, mostra solo la sezione dashboard
+      if (roleService.isClient()) {
+        window.showSection?.('dashboard');
+      }
     } else {
       showToast('❌ ' + result.error);
     }
@@ -191,6 +210,8 @@ export async function handleSignOut() {
     const result = await supabaseService.signOut();
     if (result.success) {
       currentUser = null;
+      roleService.resetRole();
+      roleService.removeClientMode();
       // Pulisci il localStorage E resetta lo state in memoria
       localStorage.removeItem('ristrutturaApp_v2');
       // Resetta esplicitamente lo state (loadData non fa nulla se localStorage è vuoto)

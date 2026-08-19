@@ -1,6 +1,8 @@
 // ===== MAIN APP ENTRY POINT =====
 // Importa tutti i moduli e li espone su window
 
+import { APP_CONFIG } from './config/appConfig.js';
+import { roleService } from './services/roleService.js';
 import { escHtml, uid, fmtEur, fmtData, daysDiff } from './utils/helpers.js';
 import { catIcons, catColors, spesaIcons, spesaColors, statoLabel, sectionTitles, tipoScadenzaIcons } from './utils/constants.js';
 import { storageService, setFreemium } from './services/storageService.js';
@@ -67,9 +69,77 @@ function handleAddBtn() {
   else showModal('modal-progetto');
 }
 
+// ===== APPLICA WHITE-LABEL CONFIG AL DOM =====
+function applyAppConfig() {
+  const cfg = APP_CONFIG;
+
+  // Titolo browser
+  document.title = cfg.appName;
+
+  // Colore primario CSS
+  document.documentElement.style.setProperty('--blue', cfg.primaryColor);
+  document.documentElement.style.setProperty('--primary', cfg.primaryColor);
+
+  // Splash screen
+  const splashIcon = document.querySelector('.splash-icon');
+  const splashTitle = document.querySelector('#splash-screen h1');
+  const splashSub = document.querySelector('#splash-screen p');
+  if (splashIcon) splashIcon.textContent = cfg.appIcon;
+  if (splashTitle) splashTitle.textContent = cfg.appName;
+  if (splashSub) splashSub.textContent = cfg.appSubtitle;
+
+  // Login header
+  const loginIcon = document.querySelector('.login-icon');
+  const loginTitle = document.querySelector('.login-header h1');
+  const loginSub = document.querySelector('.login-header p');
+  const loginFooter = document.querySelector('.login-footer p');
+  if (loginIcon) loginIcon.textContent = cfg.appIcon;
+  if (loginTitle) loginTitle.textContent = cfg.appName;
+  if (loginSub) loginSub.textContent = cfg.appSubtitle;
+  if (loginFooter) loginFooter.textContent = cfg.loginFooterNote;
+
+  // Sidebar header
+  const sidebarLogo = document.querySelector('.sidebar-logo');
+  const sidebarTitle = document.querySelector('.sidebar-header h2');
+  const sidebarSub = document.querySelector('.sidebar-sub');
+  if (sidebarLogo) sidebarLogo.textContent = cfg.appIcon;
+  if (sidebarTitle) sidebarTitle.textContent = cfg.appName;
+  if (sidebarSub) sidebarSub.textContent = cfg.appSubtitle;
+
+  // Ads sidebar
+  const adsSidebar = document.getElementById('ads-sidebar');
+  if (adsSidebar) adsSidebar.style.display = cfg.showAds ? '' : 'none';
+
+  // Premium button
+  const premiumSection = document.querySelector('.sidebar-premium');
+  if (premiumSection) premiumSection.style.display = cfg.showPremiumBtn ? '' : 'none';
+
+  // Nome cliente nella sidebar (solo white-label)
+  if (cfg.clientName) {
+    const existingBadge = document.getElementById('client-name-badge');
+    if (!existingBadge) {
+      const sidebarHeader = document.querySelector('.sidebar-header');
+      if (sidebarHeader) {
+        const badge = document.createElement('div');
+        badge.id = 'client-name-badge';
+        badge.style.cssText = 'font-size:10px;color:#999;margin-top:2px;font-weight:500;letter-spacing:0.3px;';
+        badge.textContent = `Powered by ${cfg.clientName}`;
+        sidebarHeader.appendChild(badge);
+      }
+    }
+  }
+}
+
+// Espone la config e roleService globalmente
+window.APP_CONFIG = APP_CONFIG;
+window.roleService = roleService;
+
 // Init
 window.addEventListener('DOMContentLoaded', () => {
   try {
+    // Applica configurazione white-label
+    applyAppConfig();
+
     // Carica i dati persistenti dal localStorage
     storageService.loadData();
 
@@ -143,11 +213,15 @@ window.showPremiumModal = function() {
   window.showToast?.('🌟 Funzionalità Premium - Contatta il supporto per l\'upgrade');
 };
 
+// Espone APP_CONFIG
+window.APP_CONFIG = APP_CONFIG;
+
 // Modal Privacy Policy e Termini di Servizio
 window.showLegalModal = function(type) {
   const title = document.getElementById('modal-legal-title');
   const body = document.getElementById('modal-legal-body');
   if (!title || !body) return;
+  const cfg = window.APP_CONFIG || APP_CONFIG;
   if (type === 'privacy') {
     title.textContent = 'Privacy Policy';
     body.innerHTML = `<h4 style="margin:0 0 8px">Informativa sulla Privacy</h4>
@@ -172,13 +246,13 @@ window.showLegalModal = function(type) {
         <li>Portabilità dei dati (Esporta Backup)</li>
         <li>Opposizione al trattamento</li>
       </ul>
-      <p style="margin-top:12px">Contatti: <strong>privacy@ristrutturapp.it</strong></p>`;
+      <p style="margin-top:12px">Contatti: <strong>${cfg.privacyEmail}</strong></p>`;
   } else {
     title.textContent = 'Termini di Servizio';
     body.innerHTML = `<h4 style="margin:0 0 8px">Termini di Servizio</h4>
       <p><strong>In vigore dal:</strong> 11 Agosto 2026</p>
       <h4 style="margin:16px 0 6px">Il Servizio</h4>
-      <p>RistrutturaApp è un'app per la gestione di progetti di ristrutturazione edile: lavori, spese, fornitori e scadenze.</p>
+      <p>${cfg.appName} è un'app per la gestione di progetti di ristrutturazione edile: lavori, spese, fornitori e scadenze.</p>
       <h4 style="margin:16px 0 6px">Piano Gratuito</h4>
       <ul style="padding-left:18px;margin:0">
         <li>Fino a 3 progetti attivi</li>
@@ -192,7 +266,7 @@ window.showLegalModal = function(type) {
         <li>Sei responsabile della sicurezza delle credenziali</li>
         <li>Account inattivi da 12 mesi possono essere rimossi</li>
       </ul>
-      <p style="margin-top:12px">Contatti: <strong>info@ristrutturapp.it</strong></p>`;
+      <p style="margin-top:12px">Contatti: <strong>${cfg.contactEmail}</strong></p>`;
   }
   document.getElementById('modal-legal').classList.remove('hidden');
 };
