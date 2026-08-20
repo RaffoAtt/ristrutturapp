@@ -48,43 +48,26 @@ function injectClientModeStyles() {
   style.id = 'client-mode-css';
   style.textContent = `
     #fab-add { display: none !important; }
+    .top-bar-action { display: none !important; }
     .sidebar-new-btn { display: none !important; }
     .spesa-card-actions { display: none !important; }
     .forn-actions .action-btn { display: none !important; }
     .action-btn { display: none !important; }
     #det-lav-edit-btn { display: none !important; }
     .danger-zone-card { display: none !important; }
-    #section-impostazioni .btn-primary { display: none !important; }
     #section-computo .card-import { display: none !important; }
     #nav-fornitori-sidebar { display: none !important; }
     #nav-computo-sidebar { display: none !important; }
+    #nav-spese-sidebar { display: none !important; }
+    #nav-impostazioni-sidebar { display: none !important; }
+    #section-impostazioni { display: none !important; }
+    #card-gestione-clienti { display: none !important; }
   `;
   document.head.appendChild(style);
 }
 
 export function applyClientMode(profile) {
   injectClientModeStyles();
-
-  // Barra sola lettura
-  const mainContent = document.querySelector('.main-content');
-  if (mainContent && !document.getElementById('client-readonly-bar')) {
-    const bar = document.createElement('div');
-    bar.id = 'client-readonly-bar';
-    bar.style.cssText = 'background:rgba(0,122,255,.08);border-bottom:1px solid rgba(0,122,255,.15);padding:8px 16px;font-size:12px;color:#007AFF;font-weight:600;text-align:center;';
-    bar.textContent = '👁 Vista Cliente — sola lettura';
-    mainContent.insertBefore(bar, mainContent.firstChild);
-  }
-
-  // Badge sidebar
-  const sidebarHeader = document.querySelector('.sidebar-header');
-  if (sidebarHeader && !document.getElementById('client-mode-badge')) {
-    const badge = document.createElement('div');
-    badge.id = 'client-mode-badge';
-    badge.style.cssText = 'margin-top:8px;background:rgba(0,122,255,.1);border:1px solid rgba(0,122,255,.25);border-radius:8px;padding:6px 10px;font-size:11px;color:#007AFF;font-weight:600;';
-    badge.textContent = 'Vista Cliente';
-    sidebarHeader.appendChild(badge);
-  }
-
   // Auto-seleziona il progetto collegato
   if (profile?.linked_project_id) {
     setTimeout(() => {
@@ -95,8 +78,6 @@ export function applyClientMode(profile) {
 
 export function removeClientMode() {
   document.getElementById('client-mode-css')?.remove();
-  document.getElementById('client-mode-badge')?.remove();
-  document.getElementById('client-readonly-bar')?.remove();
 }
 
 // ── GESTIONE INVITI ───────────────────────────────────────────────────────────

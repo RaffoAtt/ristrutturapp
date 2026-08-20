@@ -72,6 +72,13 @@ export function closeSidebar() {
 }
 
 export function showSection(name) {
+  // Sezioni riservate agli admin: blocca accesso a client e ospiti
+  const isClient = window.roleService?.isClient?.();
+  const isGuest = !window.roleService?.getCurrentRole?.() && !window.roleService?.getCurrentProfile?.();
+  const adminOnly = ['impostazioni', 'computo', 'fornitori'];
+  if ((isClient || isGuest) && name === 'impostazioni') { name = 'dashboard'; }
+  if (isClient && adminOnly.includes(name)) { name = 'dashboard'; }
+
   // Nascondi tutte le sezioni
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   // Rimuovi active da tutti i nav (bottom bar e sidebar)

@@ -48,6 +48,7 @@ export async function initAuth() {
     updateSidebarAuth();
 
     if (currentUser) {
+      document.body.classList.remove('guest-mode');
       const profile = await fetchUserProfile(currentUser.id);
       if (isClient()) {
         applyClientMode(profile);
@@ -60,6 +61,7 @@ export async function initAuth() {
       window.renderAll?.();
       if (isClient()) window.showSection?.('dashboard');
     } else {
+      document.body.classList.add('guest-mode');
       showGuestWarning();
     }
   } catch (error) {
@@ -239,6 +241,7 @@ export async function handleSignOut() {
       currentUser = null;
       resetRole();
       removeClientMode();
+      document.body.classList.add('guest-mode');
       localStorage.removeItem('ristrutturaApp_v2');
       if (window.storageService) {
         window.storageService.state = {

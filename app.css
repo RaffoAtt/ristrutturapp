@@ -543,6 +543,10 @@ a { color: var(--blue); }
 /* Danger zone */
 .danger-zone-card .card-header { color: var(--red); }
 
+/* ===== GUEST MODE (non loggato) ===== */
+body.guest-mode #nav-impostazioni-sidebar-item { display: none !important; }
+body.guest-mode #section-impostazioni { display: none !important; }
+
 /* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
