@@ -159,17 +159,25 @@ export async function deleteInvitation(id) {
 export async function validateInvitation(token) {
   try {
     const sb = getSupabase();
-    if (!sb) return null;
+    if (!sb) { console.error('validateInvitation: Supabase non disponibile'); return null; }
+    // Query semplice senza join per evitare errori PostgREST
     const { data, error } = await sb
       .from('invitations')
-      .select('*, progetti(nome), profiles!invitations_admin_id_fkey(display_name)')
+      .select('id, token, admin_id, project_id, display_name, expires_at, used_at')
       .eq('token', token)
       .is('used_at', null)
-      .gte('expires_at', new Date().toISOString())
       .single();
-    if (error || !data) return null;
+    if (error) { console.error('validateInvitation error:', error.message, error.details); return null; }
+    if (!data) return null;
+    if (new Date(data.expires_at) < new Date()) { console.warn('Invito scaduto'); return null; }
+    // Recupera nome progetto separatamente (opzionale)
+    try {
+      const { data: proj } = await sb.from('progetti').select('nome').eq('id', data.project_id).single();
+      if (proj) data.progetti = proj;
+    } catch {}
     return data;
-  } catch {
+  } catch (e) {
+    console.error('validateInvitation exception:', e);
     return null;
   }
 }
