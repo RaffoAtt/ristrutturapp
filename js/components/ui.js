@@ -53,20 +53,22 @@ export function hideConfirm(confirmed) {
 export function toggleSidebar() {
   const sb = document.getElementById('sidebar');
   const ov = document.getElementById('sidebar-overlay');
-  sb.classList.toggle('open');
-  sb.classList.toggle('hidden');
-  ov.classList.toggle('hidden');
+  if (!sb) return;
+  const isOpen = sb.classList.contains('open');
+  if (isOpen) {
+    sb.classList.remove('open');
+    ov?.classList.add('hidden');
+  } else {
+    sb.classList.add('open');
+    ov?.classList.remove('hidden');
+  }
 }
 
 export function closeSidebar() {
   const sb = document.getElementById('sidebar');
-  // Non nascondere la sidebar desktop (sempre visibile su schermi grandi)
-  if (sb && !sb.classList.contains('sidebar-desktop')) {
-    sb.classList.remove('open');
-    sb.classList.add('hidden');
-  }
   const ov = document.getElementById('sidebar-overlay');
-  if (ov) ov.classList.add('hidden');
+  sb?.classList.remove('open');
+  ov?.classList.add('hidden');
 }
 
 export function showSection(name) {
