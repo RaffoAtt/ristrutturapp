@@ -82,13 +82,25 @@ async function handleInviteToken(token) {
 
   // Controlla se l'utente è già loggato
   currentUser = await supabaseService.getCurrentUser();
+
   if (currentUser) {
-    // Utente già loggato: processa direttamente l'invito
+    // Se già loggato, controlla il ruolo PRIMA di fare qualsiasi cosa
+    const profile = await fetchUserProfile(currentUser.id);
+
+    if (isAdmin()) {
+      // L'admin ha aperto il link per errore — NON sovrascrivere
+      showToast('Sei già registrato come amministratore. Questo link è per i clienti.');
+      updateSidebarAuth();
+      window.renderAll?.();
+      return;
+    }
+
+    // È già un client — processa l'invito (aggiorna eventualmente il progetto collegato)
     const result = await processInvitation(token, currentUser.id);
     if (result.success) {
       showToast('Progetto collegato con successo!');
-      const profile = await fetchUserProfile(currentUser.id);
-      if (isClient()) applyClientMode(profile);
+      const updatedProfile = await fetchUserProfile(currentUser.id);
+      if (isClient()) applyClientMode(updatedProfile);
       await loadFromSupabase();
       window.renderAll?.();
       window.showSection?.('dashboard');
