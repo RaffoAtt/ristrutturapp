@@ -90,6 +90,9 @@ export function showSection(name) {
     setTimeout(() => window.renderDocumenti?.(), 100);
   }
   if (name === 'impostazioni') {
-    setTimeout(() => window.loadImpostazioni?.(), 50);
+    setTimeout(() => {
+      window.loadImpostazioni?.();
+      window.renderGestioneClienti?.();
+    }, 50);
   }
 }
