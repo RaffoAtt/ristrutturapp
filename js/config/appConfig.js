@@ -5,17 +5,15 @@
 export const APP_CONFIG = {
 
   // ── BRANDING ──────────────────────────────────────────────
-  appName:     'RistrutturaApp',           // Nome dell'app (titolo browser, splash, sidebar)
-  appSubtitle: 'Gestione Ristrutturazioni', // Sottotitolo (splash e login)
-  appIcon:     '🏗️',                       // Emoji o URL immagine per l'icona
+  appName:     'RistrutturaApp',
+  appSubtitle: 'Gestione Ristrutturazioni',
+  appIcon:     '🏗️',
 
   // ── COLORE PRIMARIO ───────────────────────────────────────
-  // Cambia questo per adattare il tema colore all'identità visiva del cliente
-  primaryColor: '#007AFF',                 // Es: '#E84C3D' per rosso, '#2ECC71' per verde
+  primaryColor: '#007AFF',
 
-  // ── FUNZIONALITÀ DEMO/COMMERCIALE ─────────────────────────
-  showAds:        true,    // false = nasconde la colonna pubblicitaria (per clienti paganti)
-  showPremiumBtn: true,    // false = nasconde il pulsante "Upgrade Premium" (per clienti paganti)
+  // ── FUNZIONALITÀ ─────────────────────────────────────────
+  showDocumenti: true,   // Mostra sezione Documenti condivisi
 
   // ── CONTATTI E LEGALE ─────────────────────────────────────
   contactEmail: 'info@ristrutturapp.it',
@@ -26,7 +24,7 @@ export const APP_CONFIG = {
 
   // ── NOME CLIENTE (solo white-label) ───────────────────────
   // Lascia vuoto per la versione demo pubblica.
-  // Per un cliente: 'Studio Tecnico Rossi' → appare nella sidebar come "powered by"
+  // Per un cliente: 'Studio Tecnico Rossi'
   clientName: '',
 
 };

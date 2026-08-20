@@ -8,6 +8,54 @@ import { showToast } from './ui.js';
 let chartSpese = null;
 let chartAndamento = null;
 
+// ── Dashboard semplificata per il cliente finale ──
+function renderClientDashboard(prog, lavori, spese, scadenze) {
+  const totSpeso = spese.reduce((s, x) => s + Number(x.importo || 0), 0);
+  const budget = prog ? Number(prog.budget || 0) : 0;
+  const pct = budget > 0 ? Math.min(100, (totSpeso / budget) * 100) : 0;
+  const completati = lavori.filter(l => l.stato === 'completato').length;
+  const inCorso = lavori.filter(l => l.stato === 'in_corso').length;
+  const daFare = lavori.filter(l => l.stato === 'da_fare').length;
+  const attesaAppr = lavori.filter(l => l.stato === 'attesa_approvazione').length;
+  const pctAvanz = lavori.length > 0
+    ? Math.round(lavori.reduce((s, l) => s + Number(l.avanzamento || 0), 0) / lavori.length)
+    : 0;
+
+  // KPI principali
+  document.getElementById('dash-budget-totale').textContent = fmtEur(budget);
+  document.getElementById('dash-speso').textContent = fmtEur(totSpeso);
+  document.getElementById('dash-residuo').textContent = fmtEur(budget - totSpeso);
+  document.getElementById('dash-preventivo').textContent = fmtEur(lavori.reduce((s, l) => s + Number(l.preventivo || 0), 0));
+  document.getElementById('dash-bar-fill').style.width = pct.toFixed(1) + '%';
+  document.getElementById('dash-bar-fill').style.background = pct > 90 ? '#FF3B30' : pct > 75 ? '#FFCC00' : '#fff';
+  document.getElementById('dash-bar-label').textContent = pct.toFixed(0) + '% del budget utilizzato';
+
+  // KPI lavori
+  document.getElementById('kpi-tot').textContent = lavori.length;
+  document.getElementById('kpi-corso').textContent = inCorso;
+  document.getElementById('kpi-ok').textContent = completati;
+  document.getElementById('kpi-spese-n').textContent = attesaAppr > 0 ? attesaAppr : daFare;
+  // Modifica etichetta KPI per il cliente
+  document.querySelector('#kpi-spese-n + .kpi-lbl').textContent = attesaAppr > 0 ? 'Da approvare' : 'Da fare';
+
+  // Avanzamento globale — mostra come KPI visivo prominente
+  const catProgressEl = document.getElementById('dash-cat-progress');
+  catProgressEl.innerHTML = `
+    <div style="text-align:center;padding:16px 0 8px;">
+      <div style="font-size:13px;color:#8E8E93;margin-bottom:8px;font-weight:500;">Avanzamento globale cantiere</div>
+      <div style="font-size:52px;font-weight:700;color:#007AFF;line-height:1;">${pctAvanz}%</div>
+      <div style="height:10px;background:#E5E5EA;border-radius:5px;margin:12px 0 6px;overflow:hidden;">
+        <div style="height:100%;background:linear-gradient(90deg,#007AFF,#5AC8FA);border-radius:5px;width:${pctAvanz}%;transition:width .6s ease;"></div>
+      </div>
+      <div style="font-size:12px;color:#8E8E93;">${completati} completati · ${inCorso} in corso · ${daFare} da fare</div>
+      ${attesaAppr > 0 ? `<div style="margin-top:10px;background:rgba(175,82,222,.1);border-radius:8px;padding:8px 12px;font-size:13px;color:#AF52DE;font-weight:600;">⏳ ${attesaAppr} lavoro/i in attesa di approvazione</div>` : ''}
+    </div>`;
+
+  // Scadenze e spese come al solito
+  renderDashScadenze(scadenze);
+  renderDashSpese(spese);
+}
+
 export function renderDashboard() {
   const prog = storageService.getProgetto();
   const lavori = storageService.getLavori();
@@ -31,6 +79,12 @@ export function renderDashboard() {
   document.getElementById('kpi-corso').textContent = lavori.filter(l => l.stato === 'in_corso').length;
   document.getElementById('kpi-ok').textContent = lavori.filter(l => l.stato === 'completato').length;
   document.getElementById('kpi-spese-n').textContent = spese.length;
+
+  // Se è un cliente, mostra la dashboard semplificata
+  if (window.roleService?.isClient()) {
+    renderClientDashboard(prog, lavori, spese, scadenze);
+    return;
+  }
 
   renderCatProgress(lavori);
   renderChartSpese(spese);

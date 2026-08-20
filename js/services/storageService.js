@@ -1,8 +1,10 @@
 // ===== DATA PERSISTENCE SERVICE =====
+// Gestisce lo stato locale e la persistenza su localStorage.
+// Il sistema supporta N progetti per utente (1:N).
 
 const STORAGE_KEY = 'ristrutturaApp_v2';
 
-const initialState = {
+export const initialState = {
   progetti: [],
   progettoAttivoId: null,
   lavori: [],
@@ -12,14 +14,6 @@ const initialState = {
   computoData: null
 };
 
-export function setFreemium(isFreemium) {
-  localStorage.setItem('isFreemium', JSON.stringify(isFreemium));
-}
-
-export function getFreemium() {
-  return JSON.parse(localStorage.getItem('isFreemium') || 'false');
-}
-
 export const storageService = {
   state: { ...initialState },
 
@@ -28,10 +22,11 @@ export const storageService = {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const saved = JSON.parse(raw);
-        this.state = { ...this.state, ...saved };
+        this.state = { ...initialState, ...saved };
       }
     } catch (e) {
       console.error('Errore caricamento dati:', e);
+      this.state = { ...initialState };
     }
     return this.state;
   },
@@ -53,22 +48,32 @@ export const storageService = {
     this.saveData();
   },
 
+  // Restituisce il progetto attivo
   getProgetto() {
     return this.state.progetti.find(p => p.id === this.state.progettoAttivoId) || null;
   },
 
+  // Restituisce tutti i progetti
+  getProgetti() {
+    return this.state.progetti || [];
+  },
+
+  // Lavori del progetto attivo
   getLavori() {
     return this.state.lavori.filter(l => l.progettoId === this.state.progettoAttivoId);
   },
 
+  // Spese del progetto attivo
   getSpese() {
     return this.state.spese.filter(s => s.progettoId === this.state.progettoAttivoId);
   },
 
+  // Fornitori (globali per utente, non per progetto)
   getFornitori() {
-    return this.state.fornitori;
+    return this.state.fornitori || [];
   },
 
+  // Scadenze del progetto attivo
   getScadenze() {
     return this.state.scadenze.filter(s => s.progettoId === this.state.progettoAttivoId);
   },

@@ -46,32 +46,56 @@ export function isAdmin() { return !_currentRole || _currentRole === 'admin'; }
 export function isClient() { return _currentRole === 'client'; }
 export function resetRole() { _currentRole = null; _currentProfile = null; }
 
+// ── Inietta CSS dinamico per la modalità client ──
+// Nasconde tutti gli elementi di scrittura/modifica
+function injectClientModeStyles() {
+  if (document.getElementById('client-mode-css')) return;
+  const style = document.createElement('style');
+  style.id = 'client-mode-css';
+  style.textContent = `
+    #fab-add { display: none !important; }
+    .sidebar-premium { display: none !important; }
+    .sidebar-new-btn { display: none !important; }
+    .sidebar-section:last-of-type { display: none !important; }
+    .spesa-card-actions { display: none !important; }
+    .forn-actions .action-btn { display: none !important; }
+    .action-btn { display: none !important; }
+    #det-lav-edit-btn { display: none !important; }
+    .card-link.danger { display: none !important; }
+    .danger-zone-card { display: none !important; }
+    .sidebar-list li.nav-impostazioni { display: none !important; }
+    #section-impostazioni .form-input { pointer-events: none; opacity: 0.65; background: #E5E5EA; }
+    #section-impostazioni .btn-primary { display: none !important; }
+    #section-computo .card-import { display: none !important; }
+    #section-computo .voce-check-item input[type=checkbox] { pointer-events: none; opacity: 0.5; }
+    #section-computo .card-link { display: none !important; }
+    #section-computo .full-btn { display: none !important; }
+    .sidebar-auth .btn-auth-signup { display: none !important; }
+  `;
+  document.head.appendChild(style);
+}
+
 // ── Applica modalità CLIENT al DOM ──
-// Aggiunge la classe `client-mode` al body (CSS si occupa di nascondere gli elementi)
 export function applyClientMode(profile) {
-  document.body.classList.add('client-mode');
+  // Inietta CSS per nascondere elementi admin
+  injectClientModeStyles();
+
+  // Barra sola lettura nella main-content
+  const mainContent = document.querySelector('.main-content');
+  if (mainContent && !document.getElementById('client-readonly-bar')) {
+    const bar = document.createElement('div');
+    bar.id = 'client-readonly-bar';
+    bar.textContent = 'Vista in sola lettura';
+    mainContent.insertBefore(bar, mainContent.firstChild);
+  }
 
   // Badge "Vista Cliente" nella sidebar
   const sidebarHeader = document.querySelector('.sidebar-header');
   if (sidebarHeader && !document.getElementById('client-mode-badge')) {
     const badge = document.createElement('div');
     badge.id = 'client-mode-badge';
-    badge.innerHTML = `
-      <div style="
-        margin-top: 10px;
-        background: rgba(0,122,255,0.12);
-        border: 1px solid rgba(0,122,255,0.3);
-        border-radius: 8px;
-        padding: 7px 10px;
-        font-size: 11px;
-        color: var(--blue, #007AFF);
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      ">
-        👁 Vista Cliente — sola lettura
-      </div>`;
+    badge.style.cssText = 'margin-top:10px;background:rgba(0,122,255,0.12);border:1px solid rgba(0,122,255,0.3);border-radius:8px;padding:7px 10px;font-size:11px;color:#007AFF;font-weight:600;display:flex;align-items:center;gap:6px;';
+    badge.textContent = 'Vista Cliente — sola lettura';
     sidebarHeader.appendChild(badge);
   }
 
@@ -85,8 +109,9 @@ export function applyClientMode(profile) {
 
 // ── Rimuove modalità CLIENT ──
 export function removeClientMode() {
-  document.body.classList.remove('client-mode');
+  document.getElementById('client-mode-css')?.remove();
   document.getElementById('client-mode-badge')?.remove();
+  document.getElementById('client-readonly-bar')?.remove();
 }
 
 // ── Crea un profilo client nel DB ──

@@ -220,25 +220,40 @@ export function openDettaglioLavoro(id) {
   const l = storageService.state.lavori.find(x => x.id === id);
   if (!l) return;
   document.getElementById('det-lav-title').textContent = escHtml(l.nome);
-  document.getElementById('det-lav-body').innerHTML = `
+
+  // Inietta il contenuto principale nel body (NON sovrascrivere il body intero
+  // perché client-features-container è un child che viene gestito da app.js)
+  const body = document.getElementById('det-lav-body');
+  // Aggiorna solo il contenuto principale lasciando il container delle feature client
+  const existingContainer = body.querySelector('#client-features-container');
+  const mainContent = `
     <div class="det-lav-header">
       <div class="det-lav-ico" style="background:${catColors[l.categoria] || '#8E8E93'}22">${catIcons[l.categoria] || '📦'}</div>
       <div><div class="det-lav-name">${escHtml(l.nome)}</div><div class="det-lav-cat">${escHtml(l.categoria || '')}</div></div>
     </div>
     <div class="det-info-grid">
-      <div class="det-info-item"><div class="det-info-label">Stato</div><div class="det-info-val">${statoLabel[l.stato] || l.stato}</div></div>
+      <div class="det-info-item"><div class="det-info-label">Stato</div><div class="det-info-val"><span class="stato-badge ${l.stato}">${statoLabel[l.stato] || l.stato}</span></div></div>
       <div class="det-info-item"><div class="det-info-label">Avanzamento</div><div class="det-info-val">${l.avanzamento || 0}%</div></div>
       <div class="det-info-item"><div class="det-info-label">Preventivo</div><div class="det-info-val">${fmtEur(l.preventivo)}</div></div>
       <div class="det-info-item"><div class="det-info-label">Priorità</div><div class="det-info-val">${l.priorita || 'normale'}</div></div>
       ${l.dataInizio ? `<div class="det-info-item"><div class="det-info-label">Inizio</div><div class="det-info-val">${fmtData(l.dataInizio)}</div></div>` : ''}
       ${l.dataFine ? `<div class="det-info-item"><div class="det-info-label">Fine prevista</div><div class="det-info-val">${fmtData(l.dataFine)}</div></div>` : ''}
     </div>
-    ${l.note ? `<div class="det-section-title">Note</div><div class="det-note">${escHtml(l.note)}</div>` : ''}`;
+    ${l.note ? `<div class="det-section-title">Note</div><div class="det-note">${escHtml(l.note)}</div>` : ''}
+    <div id="client-features-container"></div>`;
+
+  body.innerHTML = mainContent;
+
   document.getElementById('det-lav-edit-btn').onclick = () => {
     document.getElementById('modal-dettaglio-lavoro').classList.add('hidden');
     openModalLavoro(id);
   };
   document.getElementById('modal-dettaglio-lavoro').classList.remove('hidden');
+
+  // Carica note e pulsanti approvazione (async, non blocca l'apertura del modal)
+  setTimeout(() => {
+    window.loadClientFeatures?.(id, l.stato);
+  }, 50);
 }
 
 // ===== SPESE =====

@@ -46,7 +46,10 @@ export const statoLabel = {
   da_fare: 'Da fare',
   in_corso: 'In corso',
   completato: 'Completato',
-  sospeso: 'Sospeso'
+  sospeso: 'Sospeso',
+  attesa_approvazione: 'Approvazione richiesta',
+  approvato_cliente: 'Approvato dal cliente',
+  modifica_richiesta: 'Modifica richiesta'
 };
 
 export const sectionTitles = {

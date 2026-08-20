@@ -84,4 +84,12 @@ export function showSection(name) {
   // Aggiorna page title se esiste
   const pageTitle = document.getElementById('page-title');
   if (pageTitle) pageTitle.textContent = sectionTitles[name] || name;
+
+  // Azioni specifiche per sezione
+  if (name === 'documenti') {
+    setTimeout(() => window.renderDocumenti?.(), 100);
+  }
+  if (name === 'impostazioni') {
+    setTimeout(() => window.loadImpostazioni?.(), 50);
+  }
 }

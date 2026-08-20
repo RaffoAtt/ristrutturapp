@@ -7,16 +7,18 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Ristruttura" />
   <meta name="theme-color" content="#007AFF" />
-  <meta name="google-adsense-account" content="ca-pub-8540448786950927">
   <title>RistrutturaApp</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icon.png" />
   <link rel="stylesheet" href="app.css" />
+  <!-- Supabase JS (UMD) - caricato in modo sincrono -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- XLSX per import Excel -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- PDF.js -->
   <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
-  <script async src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.43.0"></script>
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8540448786950927" crossorigin="anonymous"></script>
 </head>
 <body>
 
@@ -25,12 +27,12 @@
   <div class="splash-content">
     <div class="splash-icon">🏗️</div>
     <h1>RistrutturaApp</h1>
-    <p>Gestione Lavori & Spese</p>
+    <p>Gestione Lavori e Cantieri</p>
     <div class="splash-loader"><div></div></div>
   </div>
 </div>
 
-<!-- LOGIN CONTAINER (overlay modale sopra l'app) -->
+<!-- LOGIN CONTAINER (overlay modale) -->
 <div id="login-container" class="hidden" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:1000;background:rgba(0,0,0,0.75);display:flex;align-items:center;justify-content:center;" onclick="if(event.target===this)hideLoginUI()">
   <div class="login-wrapper" style="position:relative;max-height:90vh;overflow-y:auto;width:100%;max-width:420px;">
     <button onclick="hideLoginUI()" style="position:absolute;top:12px;right:12px;background:none;border:none;font-size:22px;cursor:pointer;color:#999;line-height:1;z-index:10;">✕</button>
@@ -69,9 +71,9 @@
         <label>Conferma Password</label>
         <input type="password" id="signup-password-confirm" class="form-input" placeholder="Ripeti password" required />
       </div>
-      <div class="form-group" style="margin: 12px 0;">
-        <label style="display: flex; align-items: flex-start; font-size: 13px; font-weight: normal;">
-          <input type="checkbox" id="signup-consent" style="margin-top: 4px; margin-right: 8px; flex-shrink:0;" />
+      <div class="form-group" style="margin:12px 0;">
+        <label style="display:flex;align-items:flex-start;font-size:13px;font-weight:normal;">
+          <input type="checkbox" id="signup-consent" style="margin-top:4px;margin-right:8px;flex-shrink:0;" />
           <span>Ho letto e accetto i
             <a href="#" onclick="event.preventDefault();showLegalModal('terms')" style="color:#007AFF;text-decoration:underline;">Termini di Servizio</a>
             e la
@@ -108,9 +110,9 @@
       <div class="sidebar-label">Account</div>
       <div id="auth-status-sidebar">
         <button class="btn-auth" onclick="showLoginUI()">🔓 Accedi</button>
-        <button class="btn-auth" onclick="showSignUpUI()" style="margin-top: 8px;">✍️ Registrati</button>
+        <button class="btn-auth" onclick="showSignUpUI()" style="margin-top:8px;">✍️ Registrati</button>
       </div>
-      <div id="auth-user-info" style="display: none;">
+      <div id="auth-user-info" style="display:none;">
         <div class="user-info-box">
           <div class="user-avatar">👤</div>
           <div class="user-details">
@@ -121,18 +123,7 @@
       </div>
     </div>
 
-    <!-- PREMIUM BUTTON -->
-    <div class="sidebar-section sidebar-premium">
-      <button class="btn-premium" onclick="showPremiumModal()">
-        <span class="premium-icon">⭐</span>
-        <div class="premium-text">
-          <div class="premium-title">Upgrade Premium</div>
-          <div class="premium-desc">Progetti illimitati</div>
-        </div>
-      </button>
-    </div>
-
-    <hr class="sidebar-divider">
+    <hr class="sidebar-divider" />
 
     <!-- NAVIGATION MENU -->
     <div class="sidebar-section sidebar-nav">
@@ -144,10 +135,11 @@
         <li class="nav-item" id="nav-computo-sidebar" onclick="showSection('computo')"><span>📄</span> Computo</li>
         <li class="nav-item" id="nav-fornitori-sidebar" onclick="showSection('fornitori')"><span>👷</span> Fornitori</li>
         <li class="nav-item" id="nav-scadenze-sidebar" onclick="showSection('scadenze')"><span>📅</span> Scadenze</li>
+        <li class="nav-item" id="nav-documenti-sidebar" onclick="showSection('documenti')"><span>📁</span> Documenti</li>
       </ul>
     </div>
 
-    <hr class="sidebar-divider">
+    <hr class="sidebar-divider" />
 
     <div class="sidebar-section">
       <div class="sidebar-label">PROGETTO ATTIVO</div>
@@ -169,9 +161,8 @@
     <input type="file" id="import-backup-input" accept=".json" style="display:none" onchange="importBackup(event)" />
   </aside>
 
-  <!-- TOP BAR (Empty - Navigation moved to sidebar) -->
-  <header class="top-bar">
-  </header>
+  <!-- TOP BAR -->
+  <header class="top-bar"></header>
 
   <!-- SIDEBAR OVERLAY (Mobile) -->
   <div id="sidebar-overlay" class="sidebar-overlay hidden" onclick="closeSidebar()"></div>
@@ -182,7 +173,6 @@
     <!-- ===== DASHBOARD ===== -->
     <section id="section-dashboard" class="section active">
       <div class="section-scroll">
-
         <div class="card card-hero">
           <div class="hero-top">
             <div>
@@ -257,6 +247,15 @@
 
         <div class="card">
           <div class="card-header">
+            <span class="card-title">📈 Andamento Spese</span>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="chart-andamento"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
             <span class="card-title">⏰ Prossime Scadenze</span>
             <button class="card-link" onclick="showSection('scadenze')">Vedi tutte</button>
           </div>
@@ -269,15 +268,6 @@
             <button class="card-link" onclick="showSection('spese')">Vedi tutte</button>
           </div>
           <div id="dash-ultime-spese"></div>
-        </div>
-
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">📈 Andamento Spese</span>
-          </div>
-          <div class="chart-wrap">
-            <canvas id="chart-andamento"></canvas>
-          </div>
         </div>
 
         <div style="height:90px"></div>
@@ -334,13 +324,10 @@
           <div class="import-icon">📄</div>
           <h3>Importa Computo Metrico</h3>
           <p>Supporta file <strong>CSV</strong>, <strong>Excel (.xlsx/.xls)</strong> e <strong>PDF</strong></p>
-          <button class="btn-primary" onclick="document.getElementById('computo-file-input').click()">
-            📂 Scegli File
-          </button>
+          <button class="btn-primary" onclick="document.getElementById('computo-file-input').click()">📂 Scegli File</button>
           <input type="file" id="computo-file-input" accept=".csv,.xlsx,.xls,.pdf" style="display:none" onchange="importComputo(event)" />
           <p class="import-hint">Trascina il file qui o tocca per scegliere</p>
         </div>
-
         <div id="computo-preview" class="hidden">
           <div class="card">
             <div class="card-header">
@@ -360,7 +347,6 @@
             <button class="btn-primary full-btn" onclick="importVociSelezionate()">✅ Importa Lavori Selezionati</button>
           </div>
         </div>
-
         <div style="height:90px"></div>
       </div>
     </section>
@@ -380,6 +366,39 @@
           <button class="chip" onclick="setFornitoriFilter('Altro',this)">Altro</button>
         </div>
         <div id="fornitori-list"></div>
+        <div style="height:90px"></div>
+      </div>
+    </section>
+
+    <!-- ===== DOCUMENTI CONDIVISI ===== -->
+    <section id="section-documenti" class="section">
+      <div class="section-scroll">
+        <div id="doc-upload-area" class="card card-import" style="display:none;">
+          <div class="import-icon">📁</div>
+          <h3>Carica Documento</h3>
+          <p>PDF, Word, Excel — visibile al cliente</p>
+          <button class="btn-primary" onclick="document.getElementById('doc-file-input').click()">📂 Scegli File</button>
+          <input type="file" id="doc-file-input" accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg" style="display:none" onchange="handleDocUpload(event)" />
+          <div class="form-group" style="margin-top:12px;text-align:left;">
+            <label>Tipo documento</label>
+            <select id="doc-tipo" class="form-input">
+              <option value="preventivo">📋 Preventivo</option>
+              <option value="contratto">📝 Contratto</option>
+              <option value="sal">📊 SAL (Stato Avanzamento)</option>
+              <option value="fattura">🧾 Fattura</option>
+              <option value="altro">📄 Altro</option>
+            </select>
+          </div>
+          <div class="form-group" style="text-align:left;">
+            <label style="display:flex;align-items:center;gap:8px;font-weight:normal;">
+              <input type="checkbox" id="doc-visibile-cliente" checked style="width:18px;height:18px;accent-color:#007AFF;" />
+              Visibile al cliente
+            </label>
+          </div>
+        </div>
+        <div id="documenti-list">
+          <div class="empty-state"><div class="empty-state-icon">📁</div><h3>Nessun documento</h3><p>Carica documenti da condividere con il cliente</p></div>
+        </div>
         <div style="height:90px"></div>
       </div>
     </section>
@@ -428,7 +447,7 @@
           </div>
           <button class="btn-primary full-btn" onclick="salvaImpostazioni()">💾 Salva Impostazioni</button>
         </div>
-        <div class="card">
+        <div class="card danger-zone-card">
           <div class="card-header"><span class="card-title">🗑️ Zona Pericolosa</span></div>
           <button class="btn-danger full-btn" onclick="eliminaProgettoCorrente()">🗑️ Elimina Progetto Corrente</button>
           <button class="btn-outline full-btn mt-8" onclick="resetApp()">⚠️ Reset completo app</button>
@@ -438,30 +457,6 @@
     </section>
 
   </main>
-
-  <!-- RIGHT SIDEBAR - ADS (Desktop only) -->
-  <aside class="ads-sidebar" id="ads-sidebar">
-    <div style="padding-bottom: 12px; color: #999; font-size: 11px; text-align: center; font-weight: 600; text-transform: uppercase;">📣 Annunci</div>
-    
-    <!-- AD SPACE 1 -->
-    <div class="ad-container">
-      <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-8540448786950927" data-ad-slot="9864622545" data-ad-format="auto" data-full-width-responsive="true"></ins>
-      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
-
-    <!-- AD SPACE 2 -->
-    <div class="ad-container">
-      <ins class="adsbygoogle" style="display:inline-block;width:239px;height:250px" data-ad-client="ca-pub-8540448786950927" data-ad-slot="9325033666"></ins>
-      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
-
-    <!-- AD SPACE 3 -->
-    <div class="ad-container">
-      <ins class="adsbygoogle" style="display:inline-block;width:239px;height:250px" data-ad-client="ca-pub-8540448786950927" data-ad-slot="8175603520"></ins>
-      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
-  </aside>
-
 
 </div><!-- end #app -->
 
@@ -540,10 +535,10 @@
       <div class="form-group">
         <label>Stato</label>
         <select id="lav-stato" class="form-input">
-          <option value="da_fare">⬜ Da fare</option>
-          <option value="in_corso">🔄 In corso</option>
-          <option value="completato">✅ Completato</option>
-          <option value="sospeso">⏸️ Sospeso</option>
+          <option value="da_fare">Da fare</option>
+          <option value="in_corso">In corso</option>
+          <option value="completato">Completato</option>
+          <option value="sospeso">Sospeso</option>
         </select>
       </div>
       <div class="form-row">
@@ -576,13 +571,13 @@
         <label>Priorità</label>
         <select id="lav-priorita" class="form-input">
           <option value="normale">Normale</option>
-          <option value="alta">🔴 Alta</option>
-          <option value="bassa">🟢 Bassa</option>
+          <option value="alta">Alta</option>
+          <option value="bassa">Bassa</option>
         </select>
       </div>
       <div class="form-group">
         <label>Note</label>
-        <textarea id="lav-note" class="form-input form-textarea" placeholder="Descrizione dettagliata del lavoro..."></textarea>
+        <textarea id="lav-note" class="form-input form-textarea" placeholder="Descrizione del lavoro..."></textarea>
       </div>
       <input type="hidden" id="lav-id" value="" />
     </div>
@@ -613,12 +608,12 @@
       <div class="form-group">
         <label>Categoria</label>
         <select id="sp-categoria" class="form-input">
-          <option value="Materiali">🧱 Materiali</option>
-          <option value="Manodopera">👷 Manodopera</option>
-          <option value="Noleggio">🚜 Noleggio</option>
-          <option value="Progettazione">📐 Progettazione</option>
-          <option value="Permessi">📋 Permessi/Pratiche</option>
-          <option value="Altro">📦 Altro</option>
+          <option value="Materiali">Materiali</option>
+          <option value="Manodopera">Manodopera</option>
+          <option value="Noleggio">Noleggio</option>
+          <option value="Progettazione">Progettazione</option>
+          <option value="Permessi">Permessi/Pratiche</option>
+          <option value="Altro">Altro</option>
         </select>
       </div>
       <div class="form-group">
@@ -627,15 +622,11 @@
       </div>
       <div class="form-group">
         <label>Lavoro Associato</label>
-        <select id="sp-lavoro" class="form-input">
-          <option value="">-- Nessuno --</option>
-        </select>
+        <select id="sp-lavoro" class="form-input"><option value="">-- Nessuno --</option></select>
       </div>
       <div class="form-group">
         <label>Fornitore</label>
-        <select id="sp-fornitore" class="form-input">
-          <option value="">-- Nessuno --</option>
-        </select>
+        <select id="sp-fornitore" class="form-input"><option value="">-- Nessuno --</option></select>
       </div>
       <div class="form-group">
         <label>Metodo Pagamento</label>
@@ -682,14 +673,14 @@
       <div class="form-group">
         <label>Specializzazione</label>
         <select id="forn-tipo" class="form-input">
-          <option value="Muratore">🧱 Muratore</option>
-          <option value="Elettricista">⚡ Elettricista</option>
-          <option value="Idraulico">🔧 Idraulico</option>
-          <option value="Falegname">🪵 Falegname</option>
-          <option value="Piastrellista">🪟 Piastrellista</option>
-          <option value="Imbianchino">🎨 Imbianchino</option>
-          <option value="Geometra">📐 Geometra/Architetto</option>
-          <option value="Altro">📦 Altro</option>
+          <option value="Muratore">Muratore</option>
+          <option value="Elettricista">Elettricista</option>
+          <option value="Idraulico">Idraulico</option>
+          <option value="Falegname">Falegname</option>
+          <option value="Piastrellista">Piastrellista</option>
+          <option value="Imbianchino">Imbianchino</option>
+          <option value="Geometra">Geometra/Architetto</option>
+          <option value="Altro">Altro</option>
         </select>
       </div>
       <div class="form-group">
@@ -748,19 +739,17 @@
       <div class="form-group">
         <label>Tipo</label>
         <select id="sc-tipo" class="form-input">
-          <option value="lavoro">🔨 Milestone Lavoro</option>
-          <option value="pagamento">💰 Pagamento</option>
-          <option value="consegna">📦 Consegna Materiali</option>
-          <option value="collaudo">🔍 Collaudo/Ispezione</option>
-          <option value="pratica">📋 Pratica/Permesso</option>
-          <option value="altro">📌 Altro</option>
+          <option value="lavoro">Milestone Lavoro</option>
+          <option value="pagamento">Pagamento</option>
+          <option value="consegna">Consegna Materiali</option>
+          <option value="collaudo">Collaudo/Ispezione</option>
+          <option value="pratica">Pratica/Permesso</option>
+          <option value="altro">Altro</option>
         </select>
       </div>
       <div class="form-group">
         <label>Lavoro Associato</label>
-        <select id="sc-lavoro" class="form-input">
-          <option value="">-- Nessuno --</option>
-        </select>
+        <select id="sc-lavoro" class="form-input"><option value="">-- Nessuno --</option></select>
       </div>
       <div class="form-group">
         <label>Note</label>
@@ -783,7 +772,9 @@
       <h3 id="det-lav-title">Dettaglio Lavoro</h3>
       <button class="modal-close" onclick="hideModal('modal-dettaglio-lavoro')">✕</button>
     </div>
-    <div class="modal-body" id="det-lav-body"></div>
+    <div class="modal-body" id="det-lav-body">
+      <div id="client-features-container"></div>
+    </div>
     <div class="modal-footer">
       <button class="btn-outline" onclick="hideModal('modal-dettaglio-lavoro')">Chiudi</button>
       <button class="btn-primary" id="det-lav-edit-btn">✏️ Modifica</button>
@@ -791,17 +782,10 @@
   </div>
 </div>
 
-<!-- FAB - Pulsante aggiungi contestuale -->
-<button id="fab-add" onclick="handleAddBtn()" style="
-  position: fixed; bottom: 24px; right: 24px;
-  width: 56px; height: 56px; border-radius: 50%;
-  background: var(--blue, #007AFF); color: white;
-  border: none; font-size: 28px; cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0,122,255,0.4);
-  z-index: 900; display: flex; align-items: center; justify-content: center;
-  line-height: 1;">+</button>
+<!-- FAB -->
+<button id="fab-add" onclick="handleAddBtn()" style="position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:var(--blue,#007AFF);color:white;border:none;font-size:28px;cursor:pointer;box-shadow:0 4px 16px rgba(0,122,255,0.4);z-index:900;display:flex;align-items:center;justify-content:center;line-height:1;">+</button>
 
-<!-- MODAL: PRIVACY POLICY & TERMINI DI SERVIZIO (z-index sopra login-container) -->
+<!-- MODAL: PRIVACY POLICY & TERMINI DI SERVIZIO -->
 <div id="modal-legal" class="modal-overlay hidden" style="z-index:1100;">
   <div class="modal-sheet modal-sheet-tall">
     <div class="modal-handle"></div>
@@ -816,7 +800,7 @@
   </div>
 </div>
 
-<!-- TOAST NOTIFICATION -->
+<!-- TOAST -->
 <div id="toast" class="toast hidden"></div>
 
 <!-- CONFIRM DIALOG -->
