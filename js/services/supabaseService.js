@@ -24,7 +24,12 @@ export async function signUp(email, password) {
     const client = await initSupabase();
     const { data, error } = await client.auth.signUp({
       email,
-      password
+      password,
+      options: {
+        // Reindirizza alla stessa origine dopo la conferma email
+        // In produzione sarà https://tua-app.vercel.app
+        emailRedirectTo: window.location.origin
+      }
     });
     if (error) throw error;
     return { success: true, user: data.user };
