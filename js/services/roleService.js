@@ -1,17 +1,12 @@
 // ===== ROLE SERVICE =====
-// Gestisce i ruoli admin/client nel sistema 1:N (Azienda → Clienti)
-//
-// RUOLI:
-//   admin  → l'impresa/studio tecnico: accesso completo, crea/modifica tutto
-//   client → il cliente dell'impresa: accesso in sola lettura al proprio progetto
+// Gestisce i ruoli admin/client e il sistema di inviti
 
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../config/supabaseConfig.js';
 
 let _supabase = null;
-let _currentRole = null;    // 'admin' | 'client' | null
-let _currentProfile = null; // oggetto profilo completo
+let _currentRole = null;
+let _currentProfile = null;
 
-// ── Inizializza client Supabase (riusa quello di supabaseService se disponibile) ──
 function getSupabase() {
   if (_supabase) return _supabase;
   if (typeof window.supabase !== 'undefined') {
@@ -20,7 +15,7 @@ function getSupabase() {
   return _supabase;
 }
 
-// ── Recupera il profilo dell'utente corrente ──
+// ── Recupera il profilo dell'utente ──────────────────────────────────────────
 export async function fetchUserProfile(userId) {
   try {
     const sb = getSupabase();
@@ -39,105 +34,166 @@ export async function fetchUserProfile(userId) {
   }
 }
 
-// ── Getters ──
+// ── Getters ───────────────────────────────────────────────────────────────────
 export function getCurrentRole() { return _currentRole; }
 export function getCurrentProfile() { return _currentProfile; }
 export function isAdmin() { return !_currentRole || _currentRole === 'admin'; }
 export function isClient() { return _currentRole === 'client'; }
 export function resetRole() { _currentRole = null; _currentProfile = null; }
 
-// ── Inietta CSS dinamico per la modalità client ──
-// Nasconde tutti gli elementi di scrittura/modifica
+// ── CSS client-mode ───────────────────────────────────────────────────────────
 function injectClientModeStyles() {
   if (document.getElementById('client-mode-css')) return;
   const style = document.createElement('style');
   style.id = 'client-mode-css';
   style.textContent = `
     #fab-add { display: none !important; }
-    .sidebar-premium { display: none !important; }
     .sidebar-new-btn { display: none !important; }
-    .sidebar-section:last-of-type { display: none !important; }
     .spesa-card-actions { display: none !important; }
     .forn-actions .action-btn { display: none !important; }
     .action-btn { display: none !important; }
     #det-lav-edit-btn { display: none !important; }
-    .card-link.danger { display: none !important; }
     .danger-zone-card { display: none !important; }
-    .sidebar-list li.nav-impostazioni { display: none !important; }
-    #section-impostazioni .form-input { pointer-events: none; opacity: 0.65; background: #E5E5EA; }
     #section-impostazioni .btn-primary { display: none !important; }
     #section-computo .card-import { display: none !important; }
-    #section-computo .voce-check-item input[type=checkbox] { pointer-events: none; opacity: 0.5; }
-    #section-computo .card-link { display: none !important; }
-    #section-computo .full-btn { display: none !important; }
-    .sidebar-auth .btn-auth-signup { display: none !important; }
+    #nav-fornitori-sidebar { display: none !important; }
+    #nav-computo-sidebar { display: none !important; }
   `;
   document.head.appendChild(style);
 }
 
-// ── Applica modalità CLIENT al DOM ──
 export function applyClientMode(profile) {
-  // Inietta CSS per nascondere elementi admin
   injectClientModeStyles();
 
-  // Barra sola lettura nella main-content
+  // Barra sola lettura
   const mainContent = document.querySelector('.main-content');
   if (mainContent && !document.getElementById('client-readonly-bar')) {
     const bar = document.createElement('div');
     bar.id = 'client-readonly-bar';
-    bar.textContent = 'Vista in sola lettura';
+    bar.style.cssText = 'background:rgba(0,122,255,.08);border-bottom:1px solid rgba(0,122,255,.15);padding:8px 16px;font-size:12px;color:#007AFF;font-weight:600;text-align:center;';
+    bar.textContent = '👁 Vista Cliente — sola lettura';
     mainContent.insertBefore(bar, mainContent.firstChild);
   }
 
-  // Badge "Vista Cliente" nella sidebar
+  // Badge sidebar
   const sidebarHeader = document.querySelector('.sidebar-header');
   if (sidebarHeader && !document.getElementById('client-mode-badge')) {
     const badge = document.createElement('div');
     badge.id = 'client-mode-badge';
-    badge.style.cssText = 'margin-top:10px;background:rgba(0,122,255,0.12);border:1px solid rgba(0,122,255,0.3);border-radius:8px;padding:7px 10px;font-size:11px;color:#007AFF;font-weight:600;display:flex;align-items:center;gap:6px;';
-    badge.textContent = 'Vista Cliente — sola lettura';
+    badge.style.cssText = 'margin-top:8px;background:rgba(0,122,255,.1);border:1px solid rgba(0,122,255,.25);border-radius:8px;padding:6px 10px;font-size:11px;color:#007AFF;font-weight:600;';
+    badge.textContent = 'Vista Cliente';
     sidebarHeader.appendChild(badge);
   }
 
-  // Seleziona automaticamente il progetto del cliente
+  // Auto-seleziona il progetto collegato
   if (profile?.linked_project_id) {
     setTimeout(() => {
       window.selectProgetto?.(profile.linked_project_id);
-    }, 500);
+    }, 300);
   }
 }
 
-// ── Rimuove modalità CLIENT ──
 export function removeClientMode() {
   document.getElementById('client-mode-css')?.remove();
   document.getElementById('client-mode-badge')?.remove();
   document.getElementById('client-readonly-bar')?.remove();
 }
 
-// ── Crea un profilo client nel DB ──
-// Chiamato dall'admin quando invita un nuovo cliente
-export async function createClientProfile(userId, adminId, linkedProjectId, displayName = '') {
+// ── GESTIONE INVITI ───────────────────────────────────────────────────────────
+
+// Crea un nuovo invito per un progetto
+export async function createInvitation(projectId, displayName) {
   try {
     const sb = getSupabase();
     if (!sb) return { success: false, error: 'Supabase non disponibile' };
+    const { data: { user } } = await sb.auth.getUser();
+    if (!user) return { success: false, error: 'Non autenticato' };
+
     const { data, error } = await sb
-      .from('profiles')
-      .upsert([{
-        user_id: userId,
-        role: 'client',
-        admin_id: adminId,
-        linked_project_id: linkedProjectId,
-        display_name: displayName,
+      .from('invitations')
+      .insert([{
+        admin_id: user.id,
+        project_id: projectId,
+        display_name: displayName || ''
       }])
-      .select();
+      .select()
+      .single();
+
     if (error) throw error;
-    return { success: true, data: data[0] };
+    return { success: true, token: data.token, id: data.id };
   } catch (e) {
     return { success: false, error: e.message };
   }
 }
 
-// ── Recupera tutti i clienti di un admin ──
+// Lista tutti gli inviti dell'admin
+export async function getInvitations() {
+  try {
+    const sb = getSupabase();
+    if (!sb) return [];
+    const { data, error } = await sb
+      .from('invitations')
+      .select('*, progetti(nome)')
+      .order('created_at', { ascending: false });
+    if (error) return [];
+    return data || [];
+  } catch {
+    return [];
+  }
+}
+
+// Elimina un invito
+export async function deleteInvitation(id) {
+  try {
+    const sb = getSupabase();
+    if (!sb) return { success: false };
+    const { error } = await sb.from('invitations').delete().eq('id', id);
+    if (error) throw error;
+    return { success: true };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+}
+
+// Valida un token di invito (senza consumarlo)
+export async function validateInvitation(token) {
+  try {
+    const sb = getSupabase();
+    if (!sb) return null;
+    const { data, error } = await sb
+      .from('invitations')
+      .select('*, progetti(nome), profiles!invitations_admin_id_fkey(display_name)')
+      .eq('token', token)
+      .is('used_at', null)
+      .gte('expires_at', new Date().toISOString())
+      .single();
+    if (error || !data) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+// Processa l'invito dopo la registrazione del cliente
+export async function processInvitation(token, userId) {
+  try {
+    const sb = getSupabase();
+    if (!sb) return { success: false, error: 'Supabase non disponibile' };
+
+    const { data, error } = await sb.rpc('process_invitation', {
+      p_token: token,
+      p_user_id: userId
+    });
+
+    if (error) throw error;
+    if (!data.success) return { success: false, error: data.error };
+    return { success: true, projectId: data.project_id };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+}
+
+// ── Recupera lista clienti dell'admin ─────────────────────────────────────────
 export async function getClientiByAdmin(adminId) {
   try {
     const sb = getSupabase();
@@ -154,6 +210,28 @@ export async function getClientiByAdmin(adminId) {
   }
 }
 
+// ── Crea profilo client direttamente (da SQL admin) ───────────────────────────
+export async function createClientProfile(userId, adminId, linkedProjectId, displayName) {
+  try {
+    const sb = getSupabase();
+    if (!sb) return { success: false, error: 'Supabase non disponibile' };
+    const { data, error } = await sb
+      .from('profiles')
+      .upsert([{
+        user_id: userId,
+        role: 'client',
+        admin_id: adminId,
+        linked_project_id: linkedProjectId,
+        display_name: displayName || ''
+      }])
+      .select();
+    if (error) throw error;
+    return { success: true, data: data[0] };
+  } catch (e) {
+    return { success: false, error: e.message };
+  }
+}
+
 export const roleService = {
   fetchUserProfile,
   getCurrentRole,
@@ -163,6 +241,11 @@ export const roleService = {
   resetRole,
   applyClientMode,
   removeClientMode,
-  createClientProfile,
+  createInvitation,
+  getInvitations,
+  deleteInvitation,
+  validateInvitation,
+  processInvitation,
   getClientiByAdmin,
+  createClientProfile,
 };

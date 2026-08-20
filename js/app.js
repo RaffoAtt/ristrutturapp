@@ -2,7 +2,7 @@
 // Importa tutti i moduli e li espone su window per gli onclick inline HTML
 
 import { APP_CONFIG } from './config/appConfig.js';
-import { roleService } from './services/roleService.js';
+import { roleService, createInvitation, getInvitations, deleteInvitation } from './services/roleService.js';
 import { clientService } from './services/clientService.js';
 import { escHtml, uid, fmtEur, fmtData, daysDiff } from './utils/helpers.js';
 import { catIcons, catColors, spesaIcons, spesaColors, statoLabel, sectionTitles, tipoScadenzaIcons } from './utils/constants.js';
@@ -381,6 +381,79 @@ window.loadClientFeatures = async function (lavoroId, statoLavoro) {
 };
 
 window.renderDocumenti = renderDocumenti;
+
+// ===== GESTIONE CLIENTI E INVITI (solo admin) =====
+
+async function renderGestioneClienti() {
+  const el = document.getElementById('gestione-clienti-body');
+  if (!el) return;
+  if (!roleService.isAdmin()) { el.style.display = 'none'; return; }
+  el.style.display = '';
+  const prog = storageService.getProgetto();
+  const inviti = await getInvitations();
+  const pendenti = inviti.filter(function(i) { return !i.used_at && new Date(i.expires_at) > new Date(); });
+  let html = '';
+  if (prog) {
+    html += '<div class="form-group"><label>Nome cliente (opzionale)</label>';
+    html += '<input type="text" id="invite-display-name" class="form-input" placeholder="Es. Mario Rossi" /></div>';
+    html += '<button class="btn-primary full-btn" style="margin-bottom:8px;" onclick="generaInvito()">🔗 Genera Link di Invito</button>';
+    html += '<div id="invite-link-box"></div>';
+  } else {
+    html += '<p style="color:var(--text3);font-size:13px;">Seleziona un progetto per generare inviti.</p>';
+  }
+  if (pendenti.length) {
+    html += '<div style="margin-top:16px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">Inviti in attesa (' + pendenti.length + ')</div>';
+    pendenti.forEach(function(inv) {
+      const scade = new Date(inv.expires_at).toLocaleDateString('it-IT');
+      const link = window.location.origin + window.location.pathname + '?invite=' + inv.token;
+      html += '<div style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--bg3);border-radius:10px;margin-bottom:6px;">';
+      html += '<div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;">' + escHtml(inv.display_name || 'Cliente') + '</div>';
+      html += '<div style="font-size:11px;color:var(--text3);">' + escHtml(inv.progetti?.nome || '') + ' · scade ' + scade + '</div></div>';
+      html += '<button onclick="copiaLink(\'' + escHtml(link) + '\')" style="padding:6px 10px;background:rgba(0,122,255,.1);color:var(--blue);border:none;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600;">📋 Copia</button>';
+      html += '<button onclick="eliminaInvito(\'' + inv.id + '\')" style="padding:6px 8px;background:rgba(255,59,48,.1);color:#FF3B30;border:none;border-radius:8px;font-size:12px;cursor:pointer;">✕</button>';
+      html += '</div>';
+    });
+  }
+  el.innerHTML = html;
+}
+
+window.generaInvito = async function() {
+  const prog = storageService.getProgetto();
+  if (!prog) { showToast('Seleziona prima un progetto'); return; }
+  const displayName = document.getElementById('invite-display-name')?.value?.trim() || '';
+  showToast('Generazione link in corso...');
+  const result = await createInvitation(prog.id, displayName);
+  if (!result.success) { showToast('Errore: ' + result.error); return; }
+  const link = window.location.origin + window.location.pathname + '?invite=' + result.token;
+  const box = document.getElementById('invite-link-box');
+  if (box) {
+    box.innerHTML =
+      '<div style="background:var(--bg3);border-radius:10px;padding:10px 12px;margin-top:4px;">' +
+      '<div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-weight:600;">Link di invito (valido 7 giorni):</div>' +
+      '<div style="font-size:12px;word-break:break-all;color:var(--blue);margin-bottom:8px;">' + escHtml(link) + '</div>' +
+      '<button onclick="copiaLink(\'' + escHtml(link) + '\')" class="btn-primary full-btn" style="font-size:13px;padding:8px;">📋 Copia Link</button>' +
+      '</div>';
+  }
+  renderGestioneClienti();
+  showToast('Link generato!');
+};
+
+window.copiaLink = async function(link) {
+  try {
+    await navigator.clipboard.writeText(link);
+    showToast('Link copiato negli appunti!');
+  } catch(e) {
+    showToast('Copia manuale: ' + link);
+  }
+};
+
+window.eliminaInvito = async function(id) {
+  const result = await deleteInvitation(id);
+  if (result.success) { showToast('Invito eliminato'); renderGestioneClienti(); }
+  else showToast('Errore: ' + result.error);
+};
+
+window.renderGestioneClienti = renderGestioneClienti;
 
 // ===== INIT =====
 
