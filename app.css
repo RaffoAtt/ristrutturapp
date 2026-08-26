@@ -649,6 +649,34 @@ body.guest-mode #section-impostazioni { display: none !important; }
   height: calc(100dvh - var(--banner-h));
 }
 
+/* ===== LOGO ===== */
+.splash-logo {
+  width: 130px;
+  height: 130px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 16px rgba(0,0,0,0.25));
+  border-radius: 24px;
+}
+
+.login-logo {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  border-radius: 16px;
+}
+
+.sidebar-logo-img {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+  border-radius: 10px;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2));
+}
+
+/* Override font-size ereditato da .splash-icon e .login-icon */
+.splash-icon { font-size: unset; }
+.login-icon { font-size: unset; margin-bottom: 14px; }
+
 /* Mobile: hide text, keep buttons; fix sidebar/overlay top */
 @media (max-width: 767px) {
   .demo-banner-text { display: none; }

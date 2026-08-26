@@ -7,7 +7,57 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Ristruttura" />
   <meta name="theme-color" content="#007AFF" />
-  <title>RistrutturaApp</title>
+  <title>RistrutturaApp — Gestionale Cantieri con AI</title>
+
+  <!-- SEO -->
+  <meta name="description" content="RistrutturaApp: gestionale web per cantieri e ristrutturazioni. Gestisci lavori, spese, fornitori e computo metrico con intelligenza artificiale. Demo gratuita." />
+  <meta name="keywords" content="gestionale cantieri, software ristrutturazioni, computo metrico AI, gestione lavori edili, app cantiere" />
+  <link rel="canonical" href="https://www.ristruttura.app/" />
+
+  <!-- Open Graph (Google, Facebook, LinkedIn) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.ristruttura.app/" />
+  <meta property="og:title" content="RistrutturaApp — Gestionale Cantieri con AI" />
+  <meta property="og:description" content="Gestisci lavori, spese, fornitori e computo metrico con intelligenza artificiale. Demo gratuita disponibile." />
+  <meta property="og:image" content="https://www.ristruttura.app/logo.png" />
+  <meta property="og:image:alt" content="RistrutturaApp — Gestionale Cantieri" />
+  <meta property="og:locale" content="it_IT" />
+  <meta property="og:site_name" content="RistrutturaApp" />
+
+  <!-- Twitter / X Card -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="RistrutturaApp — Gestionale Cantieri con AI" />
+  <meta name="twitter:description" content="Gestisci lavori, spese, fornitori e computo metrico con intelligenza artificiale." />
+  <meta name="twitter:image" content="https://www.ristruttura.app/logo.png" />
+
+  <!-- Schema.org JSON-LD (logo nei risultati Google) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "RistrutturaApp",
+    "url": "https://www.ristruttura.app",
+    "logo": "https://www.ristruttura.app/logo.png",
+    "image": "https://www.ristruttura.app/logo.png",
+    "description": "Gestionale web per cantieri e ristrutturazioni con computo metrico AI. Gestisci lavori, spese, fornitori e scadenze.",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web, iOS, Android",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "EUR",
+      "description": "Demo gratuita disponibile"
+    },
+    "author": {
+      "@type": "Person",
+      "name": "Raffaele Attanasio",
+      "email": "raffattanasio97@gmail.com"
+    },
+    "inLanguage": "it",
+    "countryOfOrigin": "IT"
+  }
+  </script>
+
   <link rel="manifest" href="manifest.json" />
   <link rel="apple-touch-icon" href="icon.png" />
   <link rel="stylesheet" href="app.css" />
@@ -39,7 +89,7 @@
 <!-- SPLASH -->
 <div id="splash-screen">
   <div class="splash-content">
-    <div class="splash-icon">🏗️</div>
+    <div class="splash-icon"><img src="logo.png" alt="RistrutturaApp" class="splash-logo" /></div>
     <h1>RistrutturaApp</h1>
     <p>Gestione Lavori e Cantieri</p>
     <div class="splash-loader"><div></div></div>
@@ -51,7 +101,7 @@
   <div class="login-wrapper" style="position:relative;max-height:90vh;overflow-y:auto;width:100%;max-width:420px;">
     <button onclick="hideLoginUI()" style="position:absolute;top:12px;right:12px;background:none;border:none;font-size:22px;cursor:pointer;color:#999;line-height:1;z-index:10;">✕</button>
     <div class="login-header">
-      <div class="login-icon">🏗️</div>
+      <div class="login-icon"><img src="logo.png" alt="RistrutturaApp" class="login-logo" /></div>
       <h1>RistrutturaApp</h1>
       <p>Gestione Ristrutturazioni</p>
     </div>
@@ -113,7 +163,7 @@
   <!-- SIDEBAR FISSA (Desktop) -->
   <aside id="sidebar" class="sidebar sidebar-desktop">
     <div class="sidebar-header">
-      <div class="sidebar-logo">🏗️</div>
+      <div class="sidebar-logo"><img src="logo.png" alt="RistrutturaApp" class="sidebar-logo-img" /></div>
       <div>
         <h2>RistrutturaApp</h2>
         <p class="sidebar-sub">Gestione Ristrutturazioni</p>
