@@ -607,40 +607,6 @@ body.guest-mode #section-impostazioni { display: none !important; }
   min-width: 0;
 }
 
-.demo-banner-actions {
-  display: flex;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-.demo-contact-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: opacity .15s, transform .1s;
-  white-space: nowrap;
-  line-height: 1;
-}
-.demo-contact-btn:active { opacity: .8; transform: scale(.96); }
-
-.demo-email-btn {
-  background: rgba(255,255,255,0.13);
-  color: #fff;
-  border: 1px solid rgba(255,255,255,0.28);
-}
-.demo-email-btn:hover { background: rgba(255,255,255,0.22); color: #fff; }
-
-.demo-wa-btn {
-  background: #25D366;
-  color: #fff;
-  border: 1px solid #1db954;
-}
-.demo-wa-btn:hover { background: #1ebe58; color: #fff; }
 
 /* Shift app layout to account for demo banner */
 #app {
@@ -677,7 +643,149 @@ body.guest-mode #section-impostazioni { display: none !important; }
 .splash-icon { font-size: unset; }
 .login-icon { font-size: unset; margin-bottom: 14px; }
 
-/* Mobile: hide text, keep buttons; fix sidebar/overlay top */
+/* ===== FOOTER DESKTOP ===== */
+.app-footer {
+  display: none; /* nascosto su mobile */
+}
+
+@media (min-width: 768px) {
+  .app-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    bottom: 0;
+    left: var(--sidebar-w);
+    right: 0;
+    height: 44px;
+    background: var(--bg2);
+    border-top: 1px solid var(--sep);
+    padding: 0 24px;
+    z-index: 50;
+    gap: 16px;
+  }
+  /* Padding bottom per non coprire il contenuto col footer */
+  .section-scroll { padding-bottom: 56px !important; }
+}
+
+.footer-copy {
+  font-size: 12px;
+  color: var(--text3);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.footer-contacts {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.footer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  border-radius: 20px;
+  padding: 4px 12px;
+  transition: opacity .15s, background .15s;
+  white-space: nowrap;
+}
+.footer-link:hover { opacity: .85; }
+
+.footer-link-email {
+  background: rgba(0,122,255,.10);
+  color: var(--blue);
+}
+.footer-link-email:hover { background: rgba(0,122,255,.18); }
+
+.footer-link-wa {
+  background: rgba(37,211,102,.12);
+  color: #1a9c45;
+}
+.footer-link-wa:hover { background: rgba(37,211,102,.22); }
+
+@media (prefers-color-scheme: dark) {
+  .footer-link-wa { color: #25D366; }
+}
+
+/* ===== SEZIONE CONTATTI ===== */
+.contact-hero-card {
+  text-align: center;
+  padding: 32px 20px 28px;
+  background: linear-gradient(135deg, var(--blue) 0%, #5AC8FA 100%);
+  color: #fff;
+}
+.contact-hero-icon {
+  font-size: 52px;
+  margin-bottom: 12px;
+}
+.contact-hero-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.contact-hero-sub {
+  font-size: 14px;
+  opacity: .85;
+  line-height: 1.5;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.contact-method-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg2);
+  border-radius: var(--radius);
+  box-shadow: var(--card-shadow);
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  text-decoration: none;
+  color: var(--text1);
+  transition: transform .15s, box-shadow .15s;
+  cursor: pointer;
+}
+.contact-method-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 18px rgba(0,0,0,.12);
+}
+.contact-method-card:active { transform: scale(.98); }
+
+.contact-method-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+.contact-method-info { flex: 1; }
+.contact-method-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text1);
+}
+.contact-method-sub {
+  font-size: 13px;
+  color: var(--text3);
+  margin-top: 2px;
+}
+.contact-method-arrow {
+  font-size: 22px;
+  color: var(--text3);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* ============================= */
+
+/* Mobile: fix sidebar/overlay top */
 @media (max-width: 767px) {
   .demo-banner-text { display: none; }
   .sidebar {
