@@ -106,7 +106,7 @@ Per ogni voce di spesa restituisci un oggetto con:
 
 Classifica "categoria" in base alla descrizione: Muratura=demolizioni/muratura/massetti; Impianti Elettrici=elettrico/cablaggio/prese; Impianti Idraulici=idraulico/tubazioni/sanitari/riscaldamento; Pavimenti e Rivestimenti=pavimenti/piastrelle/parquet; Serramenti=porte/finestre/infissi; Pittura e Intonaci=pittura/tinteggiatura/intonaci; Strutture=travi/solai/fondazioni; Coperture=tetto/impermeabilizzazioni; Altro=tutto il resto.
 
-Prima di rispondere ricontrolla se ci sono voci che sono da rimuovere o da aggiungere, ed effettua un controllo sull'importo totale, eventuale iva aggiunta riportala come voce di spesa aggiuntiva.
+Prima di rispondere ricontrolla anche se sono specificati criteri per voci che non vanno inserite, ed effettua un controllo sull'importo totale se corrisponde al totale delle voci, riporta l'iva aggiunta riportala come voce di spesa aggiuntiva.
 
 Rispondi SOLO con un JSON array valido, senza markdown, senza testo aggiuntivo.
 Esempio: [{"descrizione":"Demolizione muratura","categoria":"Muratura","quantita":10,"unita":"mq","prezzoUnitario":25.50,"totale":255.00}]
