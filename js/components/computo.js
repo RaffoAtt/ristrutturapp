@@ -113,8 +113,9 @@ Testo computo:
 ${text.substring(0, 14000)}`;
 
   const isProxy = AI_CONFIG.GEMINI_ENDPOINT.startsWith('/');
-  const directHeaders = { 'Content-Type': 'application/json', 'x-goog-api-key': AI_CONFIG.GEMINI_API_KEY };
   const proxyHeaders = { 'Content-Type': 'application/json' };
+  const directHeaders = { 'Content-Type': 'application/json' };
+
 
   // Il proxy accetta { model, prompt }; la chiamata diretta usa il formato generateContent
   let response = await fetch(AI_CONFIG.GEMINI_ENDPOINT, {
@@ -129,8 +130,8 @@ ${text.substring(0, 14000)}`;
   if (!response.ok && isProxy && [401, 404, 500].includes(response.status)) {
     console.warn('Proxy non disponibile (status ' + response.status + '), fallback a Gemini diretto');
     const model = AI_CONFIG.GEMINI_MODEL;
-    response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+  response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${AI_CONFIG.GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: directHeaders,
