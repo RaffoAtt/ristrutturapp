@@ -20,14 +20,14 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'Parametri mancanti: model e prompt richiesti' });
     }
 
-    // Endpoint corretto Gemini generateContent
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+    // Endpoint corretto Gemini generateContent — chiave passata come query param
+    // (più compatibile rispetto all'header x-goog-api-key in alcuni ambienti)
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': apiKey
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }]

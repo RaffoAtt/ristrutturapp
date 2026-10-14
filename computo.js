@@ -106,8 +106,6 @@ Per ogni voce di spesa restituisci un oggetto con:
 
 Classifica "categoria" in base alla descrizione: Muratura=demolizioni/muratura/massetti; Impianti Elettrici=elettrico/cablaggio/prese; Impianti Idraulici=idraulico/tubazioni/sanitari/riscaldamento; Pavimenti e Rivestimenti=pavimenti/piastrelle/parquet; Serramenti=porte/finestre/infissi; Pittura e Intonaci=pittura/tinteggiatura/intonaci; Strutture=travi/solai/fondazioni; Coperture=tetto/impermeabilizzazioni; Altro=tutto il resto.
 
-Prima di rispondere ricontrolla anche se sono specificati criteri per voci che non vanno inserite, ed effettua un controllo sull'importo totale se corrisponde al totale delle voci, riporta l'iva aggiunta riportala come voce di spesa aggiuntiva.
-
 Rispondi SOLO con un JSON array valido, senza markdown, senza testo aggiuntivo.
 Esempio: [{"descrizione":"Demolizione muratura","categoria":"Muratura","quantita":10,"unita":"mq","prezzoUnitario":25.50,"totale":255.00}]
 
@@ -115,8 +113,8 @@ Testo computo:
 ${text.substring(0, 14000)}`;
 
   const isProxy = AI_CONFIG.GEMINI_ENDPOINT.startsWith('/');
-  const directHeaders = { 'Content-Type': 'application/json', 'x-goog-api-key': AI_CONFIG.GEMINI_API_KEY };
   const proxyHeaders = { 'Content-Type': 'application/json' };
+  const directHeaders = { 'Content-Type': 'application/json' };
 
   // Il proxy accetta { model, prompt }; la chiamata diretta usa il formato generateContent
   let response = await fetch(AI_CONFIG.GEMINI_ENDPOINT, {
@@ -128,11 +126,12 @@ ${text.substring(0, 14000)}`;
   });
 
   // Fallback: se il proxy Vercel non risponde, chiama Gemini direttamente
+  // (chiave passata come query param, più compatibile dell'header x-goog-api-key)
   if (!response.ok && isProxy && [401, 404, 500].includes(response.status)) {
     console.warn('Proxy non disponibile (status ' + response.status + '), fallback a Gemini diretto');
     const model = AI_CONFIG.GEMINI_MODEL;
     response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${AI_CONFIG.GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: directHeaders,
