@@ -59,7 +59,9 @@ export const sectionTitles = {
   computo: 'Computo Metrico',
   fornitori: 'Fornitori',
   scadenze: 'Scadenze',
-  impostazioni: 'Impostazioni'
+  documenti: 'Documenti',
+  impostazioni: 'Impostazioni',
+  contatti: 'Contatti'
 };
 
 export const tipoScadenzaIcons = {

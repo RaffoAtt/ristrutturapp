@@ -116,20 +116,27 @@ ${text.substring(0, 14000)}`;
   const directHeaders = { 'Content-Type': 'application/json', 'x-goog-api-key': AI_CONFIG.GEMINI_API_KEY };
   const proxyHeaders = { 'Content-Type': 'application/json' };
 
+  // Il proxy accetta { model, prompt }; la chiamata diretta usa il formato generateContent
   let response = await fetch(AI_CONFIG.GEMINI_ENDPOINT, {
     method: 'POST',
     headers: isProxy ? proxyHeaders : directHeaders,
-    body: JSON.stringify({ model: AI_CONFIG.GEMINI_MODEL, input: prompt })
+    body: isProxy
+      ? JSON.stringify({ model: AI_CONFIG.GEMINI_MODEL, prompt })
+      : JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
   });
 
-  // Fallback: se il proxy Vercel non è configurato, usa Gemini direttamente
+  // Fallback: se il proxy Vercel non risponde, chiama Gemini direttamente
   if (!response.ok && isProxy && [401, 404, 500].includes(response.status)) {
     console.warn('Proxy non disponibile (status ' + response.status + '), fallback a Gemini diretto');
-    response = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
-      method: 'POST',
-      headers: directHeaders,
-      body: JSON.stringify({ model: AI_CONFIG.GEMINI_MODEL, input: prompt })
-    });
+    const model = AI_CONFIG.GEMINI_MODEL;
+    response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+      {
+        method: 'POST',
+        headers: directHeaders,
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      }
+    );
   }
 
   if (!response.ok) {
@@ -138,28 +145,11 @@ ${text.substring(0, 14000)}`;
   }
 
   const data = await response.json();
-  console.log('Gemini raw response:', JSON.stringify(data).substring(0, 500));
 
-  const lastStep = Array.isArray(data.steps) ? data.steps[data.steps.length - 1] : null;
-  console.log('lastStep keys:', lastStep ? Object.keys(lastStep) : 'null');
-  console.log('lastStep sample:', JSON.stringify(lastStep).substring(0, 500));
+  // Struttura risposta standard Gemini generateContent
+  let rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-  // Struttura risposta: steps[last].content = [{text: "...JSON..."}]
-  let rawText = data.output_text || data.text || '';
-  if (!rawText && lastStep) {
-    if (Array.isArray(lastStep.content)) {
-      rawText = lastStep.content.map(c => c.text || c.content || '').join('');
-    } else if (Array.isArray(lastStep.parts)) {
-      rawText = lastStep.parts.map(p => p.text || '').join('');
-    } else {
-      rawText = lastStep.output || lastStep.text || '';
-    }
-  }
-  if (!rawText) rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
-  console.log('Gemini rawText:', rawText.substring(0, 300));
-
-  if (!rawText) throw new Error('Risposta vuota. Campi: ' + Object.keys(data).join(', '));
+  if (!rawText) throw new Error('Risposta vuota. Campi ricevuti: ' + Object.keys(data).join(', '));
 
   const cleaned = rawText.replace(/```json?/gi, '').replace(/```/g, '').trim();
   const jsonMatch = cleaned.match(/\[[\s\S]*\]/);

@@ -15,16 +15,23 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const { model, input } = req.body || {};
-    if (!model || !input) return res.status(400).json({ error: 'Parametri mancanti' });
+    const { model, prompt } = req.body || {};
+    if (!model || !prompt) {
+      return res.status(400).json({ error: 'Parametri mancanti: model e prompt richiesti' });
+    }
 
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
+    // Endpoint corretto Gemini generateContent
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'x-goog-api-key': apiKey
       },
-      body: JSON.stringify({ model, input })
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }]
+      })
     });
 
     const data = await response.json();

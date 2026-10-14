@@ -65,6 +65,36 @@ function handleAddBtn() {
   else showModal('modal-progetto');
 }
 
+// ===== THEME TOGGLE (dark/light manuale, persistito in localStorage) =====
+const THEME_STORAGE_KEY = 'ristrutturapp_theme';
+
+function applyTheme(theme) {
+  document.body.classList.remove('theme-dark', 'theme-light');
+  if (theme === 'dark') document.body.classList.add('theme-dark');
+  else if (theme === 'light') document.body.classList.add('theme-light');
+  const icon = document.getElementById('theme-toggle-icon');
+  const label = document.getElementById('theme-toggle-label');
+  const isDark = theme === 'dark' || (theme !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  if (icon) icon.textContent = isDark ? '☀️' : '🌙';
+  if (label) label.textContent = isDark ? 'Tema chiaro' : 'Tema scuro';
+}
+
+function initTheme() {
+  const saved = localStorage.getItem(THEME_STORAGE_KEY);
+  applyTheme(saved || 'auto');
+}
+
+window.toggleThemeManual = function () {
+  const current = document.body.classList.contains('theme-dark')
+    ? 'dark'
+    : document.body.classList.contains('theme-light')
+      ? 'light'
+      : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const next = current === 'dark' ? 'light' : 'dark';
+  localStorage.setItem(THEME_STORAGE_KEY, next);
+  applyTheme(next);
+};
+
 // ===== APPLICA WHITE-LABEL CONFIG AL DOM =====
 function applyAppConfig() {
   const cfg = APP_CONFIG;
@@ -459,6 +489,7 @@ window.renderGestioneClienti = renderGestioneClienti;
 
 window.addEventListener('DOMContentLoaded', function () {
   try {
+    initTheme();
     applyAppConfig();
     storageService.loadData();
 

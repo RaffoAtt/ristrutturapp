@@ -5,8 +5,11 @@
 // 3. Il file aiConfig.js è nel .gitignore e NON verrà pubblicato su git
 
 export const AI_CONFIG = {
-  // Inserisci qui la tua chiave API Gemini
+  // Usata solo per chiamate dirette (sviluppo locale senza proxy Vercel)
+  // In produzione su Vercel la chiave è in Settings > Environment Variables > GEMINI_API_KEY
   GEMINI_API_KEY: 'YOUR_GEMINI_API_KEY',
-  GEMINI_MODEL: 'gemini-3.6-flash',
-  GEMINI_ENDPOINT: 'https://generativelanguage.googleapis.com/v1beta/interactions'
+  GEMINI_MODEL: 'gemini-2.0-flash',
+  // In produzione usa il proxy Vercel ('/api/gemini')
+  // In sviluppo locale puoi usare l'endpoint diretto con la tua API key
+  GEMINI_ENDPOINT: '/api/gemini'
 };
