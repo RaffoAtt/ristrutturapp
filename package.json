@@ -1,0 +1,9 @@
+{
+  "name": "ristrutturapp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "RistrutturaApp - Gestionale Cantieri con AI",
+  "engines": {
+    "node": ">=18.x"
+  }
+}
