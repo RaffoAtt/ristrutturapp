@@ -950,36 +950,6 @@
   </div>
 </div>
 
-<!-- FALLBACK: se i moduli ES6 non si caricano (es. apertura diretta file://)
-     mostra un messaggio di errore invece della splash infinita -->
-<script>
-(function() {
-  setTimeout(function() {
-    var splash = document.getElementById('splash-screen');
-    // Se la splash è ancora visibile, i moduli ES6 non si sono caricati
-    if (splash && splash.style.display !== 'none') {
-      splash.innerHTML =
-        '<div style="text-align:center;color:#fff;padding:30px 20px;max-width:480px;">' +
-        '<div style="font-size:52px;margin-bottom:16px;">⚠️</div>' +
-        '<h2 style="font-size:22px;font-weight:800;margin-bottom:12px;">Impossibile avviare l\'app</h2>' +
-        '<p style="font-size:15px;opacity:.9;line-height:1.6;margin-bottom:20px;">' +
-        'L\'app usa moduli JavaScript ES6 che non funzionano con il protocollo <strong>file://</strong>.<br>' +
-        'Devi aprirla tramite un server HTTP locale.' +
-        '</p>' +
-        '<div style="background:rgba(255,255,255,.15);border-radius:14px;padding:18px 20px;text-align:left;font-size:13px;line-height:1.8;">' +
-        '<strong style="display:block;margin-bottom:8px;font-size:14px;">✅ Come avviare correttamente:</strong>' +
-        '<div>1. Fai doppio clic su <strong>AVVIA_APP.bat</strong> nella cartella del progetto</div>' +
-        '<div style="opacity:.75;font-size:12px;margin-top:4px;">oppure, da terminale nella cartella del progetto:</div>' +
-        '<code style="display:block;background:rgba(0,0,0,.3);border-radius:8px;padding:8px 12px;margin-top:6px;font-size:12px;">' +
-        'python -m http.server 8080</code>' +
-        '<div style="opacity:.75;font-size:12px;margin-top:6px;">poi apri: http://localhost:8080</div>' +
-        '</div>' +
-        '</div>';
-    }
-  }, 4000);
-})();
-</script>
-
 <script type="module" src="js/app.js"></script>
 </body>
 </html>
