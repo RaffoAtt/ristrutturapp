@@ -3,7 +3,7 @@
 // NOTA: Non passiamo mai l'id locale a Supabase (non è UUID)
 // Supabase genera automaticamente il proprio UUID per ogni record
 
-import { supabaseService } from './supabaseService.js';
+import { supabaseService, deleteLavoriByProgetto, deleteSpesaByProgetto, deleteScadenzeByProgetto } from './supabaseService.js';
 import { storageService } from './storageService.js';
 
 // ===== CARICA DA SUPABASE AL LOGIN =====
@@ -81,11 +81,48 @@ export async function loadFromSupabase() {
   }
 }
 
+// ===== ELIMINA PROGETTO DA SUPABASE (con tutti i dati collegati) =====
+// IMPORTANTE: eliminare prima i figli (lavori/spese/scadenze per progetto_id),
+// poi il progetto. Se si elimina prima il progetto, la RLS policy su lavori
+// ("progetto_id IN (SELECT id FROM progetti WHERE user_id = auth.uid())")
+// fallisce perché il progetto non esiste più → CASCADE viene bloccato → rollback.
+export async function deleteProgettoFromSupabase(progettoId) {
+  console.log('[DELETE] Avvio eliminazione progetto:', progettoId);
+
+  try {
+    const user = await supabaseService.getCurrentUser();
+    console.log('[DELETE] Utente autenticato:', user ? user.email : 'NON AUTENTICATO');
+    if (!user) {
+      console.error('[DELETE] ERRORE: utente non autenticato');
+      return false;
+    }
+
+    // Step 1: elimina PRIMA i figli per progetto_id (mentre il progetto esiste ancora)
+    const rLavori = await deleteLavoriByProgetto(progettoId);
+    console.log('[DELETE] Lavori eliminati →', rLavori.success ? 'OK' : 'ERRORE: ' + rLavori.error);
+
+    const rSpese = await deleteSpesaByProgetto(progettoId);
+    console.log('[DELETE] Spese eliminate →', rSpese.success ? 'OK' : 'ERRORE: ' + rSpese.error);
+
+    const rScadenze = await deleteScadenzeByProgetto(progettoId);
+    console.log('[DELETE] Scadenze eliminate →', rScadenze.success ? 'OK' : 'ERRORE: ' + rScadenze.error);
+
+    // Step 2: elimina il progetto DOPO i figli
+    const res = await supabaseService.deleteProgetto(progettoId);
+    console.log('[DELETE] Progetto', progettoId, '→', res.success ? 'ELIMINATO DA SUPABASE ✅' : 'ERRORE: ' + res.error);
+    return res.success;
+  } catch (err) {
+    console.error('[DELETE] Eccezione:', err);
+    return false;
+  }
+}
+
 // ===== SALVA PROGETTO SU SUPABASE =====
+// Restituisce l'oggetto Supabase (con UUID reale) o null
 export async function saveProgettoToSupabase(progetto) {
   try {
     const user = await supabaseService.getCurrentUser();
-    if (!user) return false;
+    if (!user) return null;
     // Niente campo 'id': Supabase genera UUID automaticamente
     const res = await supabaseService.createProgetto({
       nome: progetto.nome,
@@ -95,10 +132,10 @@ export async function saveProgettoToSupabase(progetto) {
       data_fine: progetto.dataFine || null,
       note: progetto.note || null
     });
-    return res.success;
+    return res.success ? res.data : null;
   } catch (err) {
     console.error('saveProgettoToSupabase error:', err);
-    return false;
+    return null;
   }
 }
 

@@ -3,7 +3,7 @@
 import { uid, escHtml, fmtEur, fmtData } from '../utils/helpers.js';
 import { storageService } from '../services/storageService.js';
 import { showModal, hideModal, showToast, showConfirm, closeSidebar } from './ui.js';
-import { saveProgettoToSupabase } from '../services/syncService.js';
+import { saveProgettoToSupabase, deleteProgettoFromSupabase } from '../services/syncService.js';
 
 export function renderSidebar() {
   const list = document.getElementById('progetti-list');
@@ -37,10 +37,30 @@ export function salvaProgetto() {
   storageService.state.progetti.push(obj);
   storageService.state.progettoAttivoId = obj.id;
   storageService.saveData();
-  saveProgettoToSupabase(obj).catch(e => console.warn('Supabase non disponibile:', e));
   hideModal('modal-progetto');
   window.renderAll();
   showToast('✅ Progetto creato: ' + nome);
+
+  // Salva su Supabase e aggiorna l'ID locale con l'UUID Supabase
+  saveProgettoToSupabase(obj).then(supabaseData => {
+    if (supabaseData?.id && supabaseData.id !== obj.id) {
+      const localId = obj.id;
+      const supabaseId = supabaseData.id;
+      // Aggiorna ID progetto nello state
+      const proj = storageService.state.progetti.find(p => p.id === localId);
+      if (proj) proj.id = supabaseId;
+      // Aggiorna progetto attivo se necessario
+      if (storageService.state.progettoAttivoId === localId) {
+        storageService.state.progettoAttivoId = supabaseId;
+      }
+      // Aggiorna tutti i record collegati che usano l'ID locale
+      storageService.state.lavori.forEach(l => { if (l.progettoId === localId) l.progettoId = supabaseId; });
+      storageService.state.spese.forEach(s => { if (s.progettoId === localId) s.progettoId = supabaseId; });
+      storageService.state.scadenze.forEach(s => { if (s.progettoId === localId) s.progettoId = supabaseId; });
+      storageService.saveData();
+      window.renderAll();
+    }
+  }).catch(e => console.warn('Supabase non disponibile:', e));
 }
 
 export function loadImpostazioni() {
@@ -72,15 +92,35 @@ export function eliminaProgettoCorrente() {
   const p = storageService.getProgetto();
   if (!p) return;
   showConfirm('Elimina Progetto', `Eliminare "${p.nome}" e tutti i suoi dati?`, '🗑️', () => {
-    storageService.state.progetti = storageService.state.progetti.filter(x => x.id !== p.id);
-    storageService.state.lavori = storageService.state.lavori.filter(l => l.progettoId !== p.id);
-    storageService.state.spese = storageService.state.spese.filter(s => s.progettoId !== p.id);
-    storageService.state.scadenze = storageService.state.scadenze.filter(s => s.progettoId !== p.id);
+    const progettoId = p.id;
+
+    // Rimuovi da localStorage
+    storageService.state.progetti = storageService.state.progetti.filter(x => x.id !== progettoId);
+    storageService.state.lavori = storageService.state.lavori.filter(l => l.progettoId !== progettoId);
+    storageService.state.spese = storageService.state.spese.filter(s => s.progettoId !== progettoId);
+    storageService.state.scadenze = storageService.state.scadenze.filter(s => s.progettoId !== progettoId);
     storageService.state.progettoAttivoId = storageService.state.progetti[0]?.id || null;
     storageService.saveData();
+
     window.renderAll();
     window.showSection('dashboard');
-    showToast('🗑️ Progetto eliminato');
+    showToast('🗑️ Eliminazione in corso...');
+
+    // Elimina da Supabase (prima figli poi progetto, per RLS)
+    console.log('[DELETE] ID progetto da eliminare:', progettoId);
+    deleteProgettoFromSupabase(progettoId)
+      .then(success => {
+        if (success) {
+          showToast('✅ Progetto eliminato da Supabase');
+        } else {
+          showToast('⚠️ Eliminato localmente ma errore Supabase (vedi console F12)');
+          console.warn('[DELETE] Delete Supabase fallito. Potrebbe riapparire al prossimo reload.');
+        }
+      })
+      .catch(e => {
+        console.error('[DELETE] Eccezione:', e);
+        showToast('⚠️ Errore eliminazione Supabase: ' + e.message);
+      });
   });
 }
 

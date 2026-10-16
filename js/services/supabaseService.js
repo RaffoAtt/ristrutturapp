@@ -440,6 +440,50 @@ export async function deleteScadenza(id) {
   }
 }
 
+// ===== DELETE BULK PER PROGETTO (necessario per RLS: i figli vanno eliminati PRIMA del progetto) =====
+
+export async function deleteLavoriByProgetto(progettoId) {
+  console.log('[SUPABASE] deleteLavoriByProgetto:', progettoId);
+  try {
+    const client = await initSupabase();
+    const { data, error, status, statusText } = await client.from('lavori').delete().eq('progetto_id', progettoId).select();
+    console.log('[SUPABASE] lavori delete → status:', status, 'data:', data, 'error:', error);
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('[SUPABASE] deleteLavoriByProgetto ERRORE:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function deleteSpesaByProgetto(progettoId) {
+  console.log('[SUPABASE] deleteSpesaByProgetto:', progettoId);
+  try {
+    const client = await initSupabase();
+    const { data, error, status, statusText } = await client.from('spese').delete().eq('progetto_id', progettoId).select();
+    console.log('[SUPABASE] spese delete → status:', status, 'data:', data, 'error:', error);
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('[SUPABASE] deleteSpesaByProgetto ERRORE:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function deleteScadenzeByProgetto(progettoId) {
+  console.log('[SUPABASE] deleteScadenzeByProgetto:', progettoId);
+  try {
+    const client = await initSupabase();
+    const { data, error, status, statusText } = await client.from('scadenze').delete().eq('progetto_id', progettoId).select();
+    console.log('[SUPABASE] scadenze delete → status:', status, 'data:', data, 'error:', error);
+    if (error) throw error;
+    return { success: true };
+  } catch (error) {
+    console.error('[SUPABASE] deleteScadenzeByProgetto ERRORE:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 // ===== EXPORT =====
 
 export const supabaseService = {
