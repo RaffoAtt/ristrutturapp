@@ -92,26 +92,35 @@ export function eliminaProgettoCorrente() {
   const p = storageService.getProgetto();
   if (!p) return;
   showConfirm('Elimina Progetto', `Eliminare "${p.nome}" e tutti i suoi dati?`, '🗑️', () => {
-    // Raccogli i dati collegati PRIMA di rimuoverli dallo state
-    const lavoriDaEliminare = storageService.state.lavori.filter(l => l.progettoId === p.id);
-    const speseDaEliminare = storageService.state.spese.filter(s => s.progettoId === p.id);
-    const scadenzeDaEliminare = storageService.state.scadenze.filter(s => s.progettoId === p.id);
+    const progettoId = p.id;
 
     // Rimuovi da localStorage
-    storageService.state.progetti = storageService.state.progetti.filter(x => x.id !== p.id);
-    storageService.state.lavori = storageService.state.lavori.filter(l => l.progettoId !== p.id);
-    storageService.state.spese = storageService.state.spese.filter(s => s.progettoId !== p.id);
-    storageService.state.scadenze = storageService.state.scadenze.filter(s => s.progettoId !== p.id);
+    storageService.state.progetti = storageService.state.progetti.filter(x => x.id !== progettoId);
+    storageService.state.lavori = storageService.state.lavori.filter(l => l.progettoId !== progettoId);
+    storageService.state.spese = storageService.state.spese.filter(s => s.progettoId !== progettoId);
+    storageService.state.scadenze = storageService.state.scadenze.filter(s => s.progettoId !== progettoId);
     storageService.state.progettoAttivoId = storageService.state.progetti[0]?.id || null;
     storageService.saveData();
 
-    // Elimina da Supabase in background (se loggato)
-    deleteProgettoFromSupabase(p.id, lavoriDaEliminare, speseDaEliminare, scadenzeDaEliminare)
-      .catch(e => console.warn('Supabase delete progetto:', e));
-
     window.renderAll();
     window.showSection('dashboard');
-    showToast('🗑️ Progetto eliminato');
+    showToast('🗑️ Eliminazione in corso...');
+
+    // Elimina da Supabase (prima figli poi progetto, per RLS)
+    console.log('[DELETE] ID progetto da eliminare:', progettoId);
+    deleteProgettoFromSupabase(progettoId)
+      .then(success => {
+        if (success) {
+          showToast('✅ Progetto eliminato da Supabase');
+        } else {
+          showToast('⚠️ Eliminato localmente ma errore Supabase (vedi console F12)');
+          console.warn('[DELETE] Delete Supabase fallito. Potrebbe riapparire al prossimo reload.');
+        }
+      })
+      .catch(e => {
+        console.error('[DELETE] Eccezione:', e);
+        showToast('⚠️ Errore eliminazione Supabase: ' + e.message);
+      });
   });
 }
 
