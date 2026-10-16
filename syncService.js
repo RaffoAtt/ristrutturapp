@@ -104,10 +104,11 @@ export async function deleteProgettoFromSupabase(progettoId, lavori = [], spese 
 }
 
 // ===== SALVA PROGETTO SU SUPABASE =====
+// Restituisce l'oggetto Supabase (con UUID reale) o null
 export async function saveProgettoToSupabase(progetto) {
   try {
     const user = await supabaseService.getCurrentUser();
-    if (!user) return false;
+    if (!user) return null;
     // Niente campo 'id': Supabase genera UUID automaticamente
     const res = await supabaseService.createProgetto({
       nome: progetto.nome,
@@ -117,10 +118,10 @@ export async function saveProgettoToSupabase(progetto) {
       data_fine: progetto.dataFine || null,
       note: progetto.note || null
     });
-    return res.success;
+    return res.success ? res.data : null;
   } catch (err) {
     console.error('saveProgettoToSupabase error:', err);
-    return false;
+    return null;
   }
 }
 

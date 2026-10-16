@@ -37,10 +37,30 @@ export function salvaProgetto() {
   storageService.state.progetti.push(obj);
   storageService.state.progettoAttivoId = obj.id;
   storageService.saveData();
-  saveProgettoToSupabase(obj).catch(e => console.warn('Supabase non disponibile:', e));
   hideModal('modal-progetto');
   window.renderAll();
   showToast('✅ Progetto creato: ' + nome);
+
+  // Salva su Supabase e aggiorna l'ID locale con l'UUID Supabase
+  saveProgettoToSupabase(obj).then(supabaseData => {
+    if (supabaseData?.id && supabaseData.id !== obj.id) {
+      const localId = obj.id;
+      const supabaseId = supabaseData.id;
+      // Aggiorna ID progetto nello state
+      const proj = storageService.state.progetti.find(p => p.id === localId);
+      if (proj) proj.id = supabaseId;
+      // Aggiorna progetto attivo se necessario
+      if (storageService.state.progettoAttivoId === localId) {
+        storageService.state.progettoAttivoId = supabaseId;
+      }
+      // Aggiorna tutti i record collegati che usano l'ID locale
+      storageService.state.lavori.forEach(l => { if (l.progettoId === localId) l.progettoId = supabaseId; });
+      storageService.state.spese.forEach(s => { if (s.progettoId === localId) s.progettoId = supabaseId; });
+      storageService.state.scadenze.forEach(s => { if (s.progettoId === localId) s.progettoId = supabaseId; });
+      storageService.saveData();
+      window.renderAll();
+    }
+  }).catch(e => console.warn('Supabase non disponibile:', e));
 }
 
 export function loadImpostazioni() {
