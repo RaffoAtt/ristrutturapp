@@ -4,7 +4,7 @@ import { supabaseService } from '../services/supabaseService.js';
 import { showToast } from './ui.js';
 import { loadFromSupabase } from '../services/syncService.js';
 import {
-  roleService, fetchUserProfile, isClient,
+  roleService, fetchUserProfile, isAdmin, isClient,
   applyClientMode, removeClientMode, resetRole,
   validateInvitation, processInvitation
 } from '../services/roleService.js';
